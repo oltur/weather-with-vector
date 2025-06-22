@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        /* Cloud Layer */
+        .cloud-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .cloud {
+            position: absolute;
+            opacity: 0.7;
+            animation: float linear infinite;
+        }
+        
+        .cloud1 {
+            top: 10%;
+            left: -100px;
+            width: 80px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 40px;
+            animation-duration: 20s;
+        }
+        
+        .cloud1:before,
+        .cloud1:after {
+            content: '';
+            position: absolute;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+        }
+        
+        .cloud1:before {
+            width: 50px;
+            height: 50px;
+            top: -25px;
+            left: 15px;
+        }
+        
+        .cloud1:after {
+            width: 60px;
+            height: 60px;
+            top: -30px;
+            right: 15px;
+        }
+        
+        .cloud2 {
+            top: 25%;
+            left: -150px;
+            width: 120px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 60px;
+            animation-duration: 25s;
+            animation-delay: 5s;
+        }
+        
+        .cloud2:before,
+        .cloud2:after {
+            content: '';
+            position: absolute;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+        }
+        
+        .cloud2:before {
+            width: 70px;
+            height: 70px;
+            top: -35px;
+            left: 20px;
+        }
+        
+        .cloud2:after {
+            width: 80px;
+            height: 80px;
+            top: -40px;
+            right: 20px;
+        }
+        
+        .cloud3 {
+            top: 60%;
+            left: -80px;
+            width: 60px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 30px;
+            animation-duration: 18s;
+            animation-delay: 10s;
+        }
+        
+        .cloud3:before,
+        .cloud3:after {
+            content: '';
+            position: absolute;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+        }
+        
+        .cloud3:before {
+            width: 40px;
+            height: 40px;
+            top: -20px;
+            left: 10px;
+        }
+        
+        .cloud3:after {
+            width: 45px;
+            height: 45px;
+            top: -22px;
+            right: 10px;
+        }
+        
+        .cloud4 {
+            top: 80%;
+            left: -200px;
+            width: 100px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 50px;
+            animation-duration: 30s;
+            animation-delay: 15s;
+        }
+        
+        .cloud4:before,
+        .cloud4:after {
+            content: '';
+            position: absolute;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+        }
+        
+        .cloud4:before {
+            width: 60px;
+            height: 60px;
+            top: -30px;
+            left: 15px;
+        }
+        
+        .cloud4:after {
+            width: 70px;
+            height: 70px;
+            top: -35px;
+            right: 15px;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateX(-100px);
+            }
+            100% {
+                transform: translateX(calc(100vw + 100px));
+            }
+        }
+        
+        .container { 
+            max-width: 900px; 
+            margin: 0 auto; 
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 
+                0 20px 40px rgba(255, 182, 193, 0.2),
+                0 8px 16px rgba(255, 182, 193, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 182, 193, 0.3);
+            transform: translateZ(0);
+            position: relative;
+            z-index: 2;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(255, 182, 193, 0.3);
+            background: linear-gradient(45deg, #ff69b4, #ff1493);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .input-section { 
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .input-section input { 
+            padding: 15px 20px;
+            margin-right: 15px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            width: 300px;
+            box-shadow: 
+                0 4px 8px rgba(255, 182, 193, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            background: linear-gradient(145deg, #fff5f5, #ffe4e1);
+            transition: all 0.3s ease;
+        }
+        
+        .input-section input:focus {
+            outline: none;
+            box-shadow: 
+                0 6px 12px rgba(255, 182, 193, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8),
+                0 0 0 3px rgba(255, 105, 180, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .input-section button { 
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            background: linear-gradient(45deg, #ff69b4, #ff1493);
+            color: white;
+            cursor: pointer;
+            box-shadow: 
+                0 6px 12px rgba(255, 105, 180, 0.4),
+                0 2px 4px rgba(255, 182, 193, 0.2);
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .input-section button:hover {
+            transform: translateY(-3px);
+            box-shadow: 
+                0 8px 16px rgba(255, 105, 180, 0.5),
+                0 4px 8px rgba(255, 182, 193, 0.3);
+        }
+        
+        .input-section button:active {
+            transform: translateY(-1px);
+            box-shadow: 
+                0 4px 8px rgba(255, 105, 180, 0.4),
+                0 2px 4px rgba(255, 182, 193, 0.2);
+        }
+        
+        #map { 
+            height: 450px; 
+            width: 100%; 
+            margin: 30px 0;
+            border-radius: 20px;
+            box-shadow: 
+                0 15px 30px rgba(255, 182, 193, 0.3),
+                0 5px 15px rgba(255, 182, 193, 0.2);
+            border: 3px solid rgba(255, 182, 193, 0.4);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        /* Custom Leaflet Controls Styling */
+        .leaflet-control-zoom {
+            border: none !important;
+            box-shadow: 0 4px 8px rgba(255, 182, 193, 0.3) !important;
+        }
+        
+        .leaflet-control-zoom a {
+            background: linear-gradient(45deg, #ff69b4, #ff1493) !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 8px !important;
+            margin: 2px !important;
+            transition: all 0.3s ease !important;
+        }
+        
+        .leaflet-control-zoom a:hover {
+            background: linear-gradient(45deg, #ff1493, #ff69b4) !important;
+            transform: scale(1.05) !important;
+        }
+        
+        .leaflet-control-attribution {
+            background: rgba(255, 255, 255, 0.9) !important;
+            color: #ff69b4 !important;
+            border-radius: 8px !important;
+            padding: 4px 8px !important;
+        }
+        
+        #weather-results { 
+            margin-top: 30px;
+            padding: 25px;
+            background: linear-gradient(145deg, #fff5f5, #ffe4e1);
+            border-radius: 20px;
+            box-shadow: 
+                0 10px 20px rgba(255, 182, 193, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 182, 193, 0.3);
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .weather-card {
+            background: linear-gradient(135deg, #ff69b4 0%, #ff1493 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 
+                0 15px 30px rgba(255, 105, 180, 0.4),
+                0 5px 15px rgba(255, 182, 193, 0.3);
+            text-align: center;
+            width: 100%;
+            max-width: 500px;
+            transform: perspective(1000px) rotateX(5deg);
+            transition: all 0.3s ease;
+        }
+        
+        .weather-card:hover {
+            transform: perspective(1000px) rotateX(0deg) translateY(-5px);
+            box-shadow: 
+                0 20px 40px rgba(255, 105, 180, 0.5),
+                0 10px 20px rgba(255, 182, 193, 0.4);
+        }
+        
+        .weather-card h2 {
+            font-size: 2em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(255, 182, 193, 0.5);
+        }
+        
+        .weather-card p {
+            font-size: 1.2em;
+            margin: 10px 0;
+            text-shadow: 1px 1px 2px rgba(255, 182, 193, 0.5);
+        }
+        
+        .loading {
+            color: #ff69b4;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+        
+        .error {
+            color: #e91e63;
+            font-size: 1.1em;
+            font-weight: 600;
+            text-align: center;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                padding: 20px;
+            }
+            
+            .input-section input {
+                width: 100%;
+                margin-bottom: 15px;
+                margin-right: 0;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+        }
+        
+        /* Voice Interface Styling */
+        .voice-btn {
+            background: linear-gradient(45deg, #ff69b4, #ff1493) !important;
+            margin-left: 10px;
+        }
+        
+        .voice-btn.listening {
+            background: linear-gradient(45deg, #e91e63, #c2185b) !important;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .voice-status {
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            background: linear-gradient(145deg, #fff5f5, #ffe4e1);
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(255, 182, 193, 0.2);
+        }
+        
+        .voice-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .pulse-ring {
+            width: 20px;
+            height: 20px;
+            border: 3px solid #ff69b4;
+            border-radius: 50%;
+            animation: pulse-ring 1.5s infinite;
+        }
+        
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); opacity: 1; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+        
+        /* Language Switcher Styling */
+        .language-switcher {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .lang-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 20px;
+            font-size: 16px;
+            font-weight: 600;
+            background: linear-gradient(45deg, #ff69b4, #ff1493);
+            color: white;
+            cursor: pointer;
+            box-shadow: 
+                0 6px 12px rgba(255, 105, 180, 0.4),
+                0 2px 4px rgba(255, 182, 193, 0.2);
+            transition: all 0.3s ease;
+            margin: 0 5px;
+        }
+        
+        .lang-btn.active {
+            background: linear-gradient(45deg, #ff1493, #ff69b4);
+        }
+        
+        /* RTL Support for Hebrew */
+        [dir="rtl"] {
+            direction: rtl;
+            text-align: right;
+        }
+        
+        [dir="rtl"] .input-section input {
+            margin-right: 0;
+            margin-left: 15px;
+        }
+        
+        [dir="rtl"] .voice-btn {
+            margin-left: 0;
+            margin-right: 10px;
+        }
+        
+        [dir="rtl"] .lang-btn {
+            margin: 0 5px;
+        }
+        
+        [dir="rtl"] .voice-indicator {
+            flex-direction: row-reverse;
+        }
+        
+        [dir="rtl"] .weather-card p {
+            text-align: right;
+        }
+        
+        /* Voice Reading Toggle Styling */
+        .voice-toggle-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .voice-toggle-label {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .voice-toggle-label span {
+            font-weight: 600;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            -webkit-transition: .4s;
+            transition: .4s;
+            border-radius: 30px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            -webkit-transition: .4s;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+        
+        input:focus + .slider {
+            box-shadow: 0 0 1px #2196F3;
+        }
+        
+        input:checked + .slider:before {
+            -webkit-transform: translateX(26px);
+            -ms-transform: translateX(26px);
+            transform: translateX(26px);
+        }
+        
+        .slider.round {
+            border-radius: 30px;
+        }
+        
+        .slider.round:before {
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+    <!-- Cloud Layer -->
+    <div class="cloud-layer">
+        <div class="cloud cloud1"></div>
+        <div class="cloud cloud2"></div>
+        <div class="cloud cloud3"></div>
+        <div class="cloud cloud4"></div>
+    </div>
+
+    <div class="container">
+        <h1>🌸 Weather App</h1>
+        
+        <div class="input-section">
+            <input type="text" id="city" placeholder="Enter city or click on map" required>
+            <button onclick="getWeatherFromInput()">Get Weather</button>
+            <button id="voiceBtn" onclick="toggleVoiceInput()" class="voice-btn">
+                <span id="voiceIcon">🎤</span>
+                <span id="voiceText">Voice</span>
+            </button>
+        </div>
+        
+        <!-- Language Switcher -->
+        <div class="language-switcher">
+            <button class="lang-btn active" data-lang="en" onclick="switchLanguage('en')">🇺🇸 EN</button>
+            <button class="lang-btn" data-lang="de" onclick="switchLanguage('de')">🇩🇪 DE</button>
+            <button class="lang-btn" data-lang="uk" onclick="switchLanguage('uk')">🇺🇦 UK</button>
+            <button class="lang-btn" data-lang="he" onclick="switchLanguage('he')">🇮🇱 HE</button>
+        </div>
+        
+        <!-- Voice Reading Toggle -->
+        <div class="voice-toggle-container">
+            <label class="voice-toggle-label">
+                <span id="voiceToggleText">Voice Reading</span>
+                <div class="toggle-switch">
+                    <input type="checkbox" id="voiceToggle" checked>
+                    <span class="slider"></span>
+                </div>
+            </label>
+        </div>
+        
+        <!-- Voice Status Display -->
+        <div id="voiceStatus" class="voice-status" style="display: none;">
+            <div class="voice-indicator">
+                <div class="pulse-ring"></div>
+                <span id="voiceStatusText">Listening...</span>
+            </div>
+        </div>
+        
+        <div id="map"></div>
+        <div id="weather-results">
+            <div class="loading">Detecting your location...</div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        let map;
+        let marker;
+        let isListening = false;
+        let recognition;
+        let currentLanguage = 'en';
+        let voiceReadingEnabled = true;
+
+        // Load saved preferences from localStorage
+        function loadPreferences() {
+            const savedLanguage = localStorage.getItem('weatherAppLanguage');
+            const savedVoiceReading = localStorage.getItem('weatherAppVoiceReading');
+            
+            if (savedLanguage) {
+                currentLanguage = savedLanguage;
+            }
+            
+            if (savedVoiceReading !== null) {
+                voiceReadingEnabled = savedVoiceReading === 'true';
+            }
+            
+            // Update UI to reflect saved preferences
+            updateLanguageUI();
+            updateVoiceToggleUI();
+        }
+
+        // Save preferences to localStorage
+        function savePreferences() {
+            localStorage.setItem('weatherAppLanguage', currentLanguage);
+            localStorage.setItem('weatherAppVoiceReading', voiceReadingEnabled.toString());
+        }
+
+        // Update language UI to reflect current language
+        function updateLanguageUI() {
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-lang="${currentLanguage}"]`).classList.add('active');
+            
+            // Update document direction for RTL languages
+            if (currentLanguage === 'he') {
+                document.documentElement.setAttribute('dir', 'rtl');
+            } else {
+                document.documentElement.setAttribute('dir', 'ltr');
+            }
+            
+            updateUIText();
+        }
+
+        // Update voice toggle UI
+        function updateVoiceToggleUI() {
+            const voiceToggle = document.getElementById('voiceToggle');
+            const voiceToggleText = document.getElementById('voiceToggleText');
+            const t = translations[currentLanguage];
+            
+            voiceToggle.checked = voiceReadingEnabled;
+            voiceToggleText.textContent = t.voiceReading || 'Voice Reading';
+        }
+
+        // Voice toggle change handler
+        function toggleVoiceReading() {
+            voiceReadingEnabled = !voiceReadingEnabled;
+            savePreferences();
+            updateVoiceToggleUI();
+        }
+
+        // Translation dictionary
+        const translations = {
+            en: {
+                title: "🌸 Weather App",
+                cityPlaceholder: "Enter city or click on map",
+                getWeather: "Get Weather",
+                voice: "Voice",
+                listening: "Listening...",
+                detectingLocation: "Detecting your location...",
+                loadingWeather: "Loading weather data...",
+                temperature: "Temperature",
+                weather: "Weather",
+                humidity: "Humidity",
+                windSpeed: "Wind Speed",
+                coordinates: "Coordinates",
+                error: "Error",
+                unexpectedError: "An unexpected error occurred.",
+                weatherIn: "Weather in",
+                degreesCelsius: "degrees Celsius",
+                percent: "percent",
+                metersPerSecond: "meters per second",
+                is: "is",
+                voiceReading: "Voice Reading",
+                voiceCommands: {
+                    weatherIn: "weather in",
+                    temperatureIn: "temperature in",
+                    currentWeather: "current weather",
+                    weatherHere: "weather here",
+                    help: "help",
+                    commands: "commands"
+                },
+                voiceResponses: {
+                    gettingWeather: "Getting weather for",
+                    gettingCurrentLocation: "Getting weather for your current location.",
+                    locationError: "Could not get your location. Please try typing a city name.",
+                    specifyCity: "Please specify a city name. For example, say \"weather in London\" or \"temperature in New York\".",
+                    helpText: "You can say: \"weather in [city name]\", \"temperature here\", \"current weather\", or \"help\" for commands.",
+                    heard: "I heard:",
+                    tryAgain: "Try saying \"weather in [city name]\" or \"help\" for commands.",
+                    sorryError: "Sorry, I could not understand that. Please try again.",
+                    weatherError: "Sorry, there was an error getting the weather data."
+                }
+            },
+            de: {
+                title: "🌸 Wetter App",
+                cityPlaceholder: "Stadt eingeben oder auf Karte klicken",
+                getWeather: "Wetter abrufen",
+                voice: "Sprache",
+                listening: "Höre zu...",
+                detectingLocation: "Standort wird ermittelt...",
+                loadingWeather: "Wetterdaten werden geladen...",
+                temperature: "Temperatur",
+                weather: "Wetter",
+                humidity: "Luftfeuchtigkeit",
+                windSpeed: "Windgeschwindigkeit",
+                coordinates: "Koordinaten",
+                error: "Fehler",
+                unexpectedError: "Ein unerwarteter Fehler ist aufgetreten.",
+                weatherIn: "Wetter in",
+                degreesCelsius: "Grad Celsius",
+                percent: "Prozent",
+                metersPerSecond: "Meter pro Sekunde",
+                is: "ist",
+                voiceReading: "Sprachausgabe",
+                voiceCommands: {
+                    weatherIn: "wetter in",
+                    temperatureIn: "temperatur in",
+                    currentWeather: "aktuelles wetter",
+                    weatherHere: "wetter hier",
+                    help: "hilfe",
+                    commands: "befehle"
+                },
+                voiceResponses: {
+                    gettingWeather: "Wetter wird abgerufen für",
+                    gettingCurrentLocation: "Wetter wird für Ihren aktuellen Standort abgerufen.",
+                    locationError: "Standort konnte nicht ermittelt werden. Bitte versuchen Sie, einen Stadtnamen einzugeben.",
+                    specifyCity: "Bitte geben Sie einen Stadtnamen an. Zum Beispiel sagen Sie \"Wetter in Berlin\" oder \"Temperatur in München\".",
+                    helpText: "Sie können sagen: \"Wetter in [Stadtname]\", \"Temperatur hier\", \"aktuelles Wetter\" oder \"Hilfe\" für Befehle.",
+                    heard: "Ich habe gehört:",
+                    tryAgain: "Versuchen Sie \"Wetter in [Stadtname]\" oder \"Hilfe\" für Befehle zu sagen.",
+                    sorryError: "Entschuldigung, das konnte ich nicht verstehen. Bitte versuchen Sie es erneut.",
+                    weatherError: "Entschuldigung, beim Abrufen der Wetterdaten ist ein Fehler aufgetreten."
+                }
+            },
+            uk: {
+                title: "🌸 Погодна Програма",
+                cityPlaceholder: "Введіть місто або клікніть на карту",
+                getWeather: "Отримати погоду",
+                voice: "Голос",
+                listening: "Слухаю...",
+                detectingLocation: "Визначення вашого місцезнаходження...",
+                loadingWeather: "Завантаження даних про погоду...",
+                temperature: "Температура",
+                weather: "Погода",
+                humidity: "Вологість",
+                windSpeed: "Швидкість вітру",
+                coordinates: "Координати",
+                error: "Помилка",
+                unexpectedError: "Сталася неочікувана помилка.",
+                weatherIn: "Погода в",
+                degreesCelsius: "градусів Цельсія",
+                percent: "відсотків",
+                metersPerSecond: "метрів за секунду",
+                is: "є",
+                voiceReading: "Голосове читання",
+                voiceCommands: {
+                    weatherIn: "погода в",
+                    temperatureIn: "температура в",
+                    currentWeather: "поточна погода",
+                    weatherHere: "погода тут",
+                    help: "допомога",
+                    commands: "команди"
+                },
+                voiceResponses: {
+                    gettingWeather: "Отримання погоди для",
+                    gettingCurrentLocation: "Отримання погоди для вашого поточного місцезнаходження.",
+                    locationError: "Не вдалося визначити ваше місцезнаходження. Спробуйте ввести назву міста.",
+                    specifyCity: "Будь ласка, вкажіть назву міста. Наприклад, скажіть \"погода в Києві\" або \"температура в Львові\".",
+                    helpText: "Ви можете сказати: \"погода в [назва міста]\", \"температура тут\", \"поточна погода\" або \"допомога\" для команд.",
+                    heard: "Я чую:",
+                    tryAgain: "Спробуйте сказати \"погода в [назва міста]\" або \"допомога\" для команд.",
+                    sorryError: "Вибачте, я не зрозумів це. Будь ласка, спробуйте ще раз.",
+                    weatherError: "Вибачте, сталася помилка при отриманні даних про погоду."
+                }
+            },
+            he: {
+                title: "🌸 אפליקציית מזג אוויר",
+                cityPlaceholder: "הזן עיר או לחץ על המפה",
+                getWeather: "קבל מזג אוויר",
+                voice: "קול",
+                listening: "מאזין...",
+                detectingLocation: "מאתר את המיקום שלך...",
+                loadingWeather: "טוען נתוני מזג אוויר...",
+                temperature: "טמפרטורה",
+                weather: "מזג אוויר",
+                humidity: "לחות",
+                windSpeed: "מהירות רוח",
+                coordinates: "קואורדינטות",
+                error: "שגיאה",
+                unexpectedError: "אירעה שגיאה בלתי צפויה.",
+                weatherIn: "מזג אוויר ב",
+                degreesCelsius: "מעלות צלזיוס",
+                percent: "אחוזים",
+                metersPerSecond: "מטרים לשנייה",
+                is: "היא",
+                voiceReading: "קריאה קולית",
+                voiceCommands: {
+                    weatherIn: "מזג אוויר ב",
+                    temperatureIn: "טמפרטורה ב",
+                    currentWeather: "מזג אוויר נוכחי",
+                    weatherHere: "מזג אוויר כאן",
+                    help: "עזרה",
+                    commands: "פקודות"
+                },
+                voiceResponses: {
+                    gettingWeather: "מקבל מזג אוויר עבור",
+                    gettingCurrentLocation: "מקבל מזג אוויר למיקום הנוכחי שלך.",
+                    locationError: "לא ניתן לקבל את המיקום שלך. אנא נסה להזין שם עיר.",
+                    specifyCity: "אנא ציין שם עיר. לדוגמה, אמור \"מזג אוויר בירושלים\" או \"טמפרטורה בתל אביב\".",
+                    helpText: "אתה יכול לומר: \"מזג אוויר ב [שם עיר]\", \"טמפרטורה כאן\", \"מזג אוויר נוכחי\", או \"עזרה\" לפקודות.",
+                    heard: "שמעתי:",
+                    tryAgain: "נסה לומר \"מזג אוויר ב [שם עיר]\" או \"עזרה\" לפקודות.",
+                    sorryError: "מצטער, לא הצלחתי להבין את זה. אנא נסה שוב.",
+                    weatherError: "מצטער, אירעה שגיאה בקבלת נתוני מזג האוויר."
+                }
+            }
+        };
+
+        // Language switching function
+        function switchLanguage(lang) {
+            currentLanguage = lang;
+            
+            // Save preferences
+            savePreferences();
+            
+            // Update language UI
+            updateLanguageUI();
+            
+            // Update speech recognition language
+            if (recognition) {
+                recognition.lang = lang === 'en' ? 'en-US' : lang === 'de' ? 'de-DE' : lang === 'uk' ? 'uk-UA' : 'he-IL';
+            }
+        }
+
+        // Update UI text based on current language
+        function updateUIText() {
+            const t = translations[currentLanguage];
+            
+            // Update title
+            document.querySelector('h1').textContent = t.title;
+            
+            // Update input placeholder
+            document.getElementById('city').placeholder = t.cityPlaceholder;
+            
+            // Update button text
+            document.querySelector('button[onclick="getWeatherFromInput()"]').textContent = t.getWeather;
+            document.getElementById('voiceText').textContent = t.voice;
+            
+            // Update voice status
+            document.getElementById('voiceStatusText').textContent = t.listening;
+            
+            // Update loading text
+            const loadingDiv = document.querySelector('.loading');
+            if (loadingDiv && loadingDiv.textContent.includes('Detecting')) {
+                loadingDiv.textContent = t.detectingLocation;
+            }
+        }
+
+        // Initialize speech recognition
+        function initSpeechRecognition() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.lang = 'en-US';
+
+                recognition.onstart = function() {
+                    isListening = true;
+                    updateVoiceUI();
+                };
+
+                recognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript.toLowerCase();
+                    console.log('Voice input:', transcript);
+                    processVoiceCommand(transcript);
+                };
+
+                recognition.onerror = function(event) {
+                    console.error('Speech recognition error:', event.error);
+                    speakText(translations[currentLanguage].voiceResponses.sorryError);
+                    stopVoiceInput();
+                };
+
+                recognition.onend = function() {
+                    stopVoiceInput();
+                };
+            } else {
+                console.log('Speech recognition not supported');
+                document.getElementById('voiceBtn').style.display = 'none';
+            }
+        }
+
+        function toggleVoiceInput() {
+            if (isListening) {
+                stopVoiceInput();
+            } else {
+                startVoiceInput();
+            }
+        }
+
+        function startVoiceInput() {
+            if (recognition) {
+                recognition.start();
+            }
+        }
+
+        function stopVoiceInput() {
+            if (recognition) {
+                recognition.stop();
+            }
+            isListening = false;
+            updateVoiceUI();
+        }
+
+        function updateVoiceUI() {
+            const voiceBtn = document.getElementById('voiceBtn');
+            const voiceIcon = document.getElementById('voiceIcon');
+            const voiceText = document.getElementById('voiceText');
+            const voiceStatus = document.getElementById('voiceStatus');
+            const t = translations[currentLanguage];
+
+            if (isListening) {
+                voiceBtn.classList.add('listening');
+                voiceIcon.textContent = '🔴';
+                voiceText.textContent = 'Stop';
+                voiceStatus.style.display = 'block';
+            } else {
+                voiceBtn.classList.remove('listening');
+                voiceIcon.textContent = '🎤';
+                voiceText.textContent = t.voice;
+                voiceStatus.style.display = 'none';
+            }
+        }
+
+        function processVoiceCommand(transcript) {
+            const t = translations[currentLanguage];
+            const commands = t.voiceCommands;
+            
+            // Weather commands
+            if (transcript.includes(commands.weatherIn) || transcript.includes(commands.temperatureIn)) {
+                if (transcript.includes(commands.currentWeather) || transcript.includes(commands.weatherHere)) {
+                    // Get weather for current location
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(
+                            (position) => {
+                                speakText(t.voiceResponses.gettingCurrentLocation);
+                                getWeatherFromCoordinates(position.coords.latitude, position.coords.longitude);
+                            },
+                            () => {
+                                speakText(t.voiceResponses.locationError);
+                            }
+                        );
+                    }
+                } else {
+                    // Extract city name from transcript
+                    const cityMatch = extractCityFromTranscript(transcript, currentLanguage);
+                    if (cityMatch) {
+                        speakText(`${t.voiceResponses.gettingWeather} ${cityMatch}.`);
+                        document.getElementById('city').value = cityMatch;
+                        getWeatherFromInput();
+                    } else {
+                        speakText(t.voiceResponses.specifyCity);
+                    }
+                }
+            } else if (transcript.includes(commands.help) || transcript.includes(commands.commands)) {
+                speakText(t.voiceResponses.helpText);
+            } else {
+                speakText(`${t.voiceResponses.heard} ${transcript}. ${t.voiceResponses.tryAgain}`);
+            }
+        }
+
+        function extractCityFromTranscript(transcript, lang) {
+            const t = translations[lang];
+            const patterns = [
+                new RegExp(`${t.voiceCommands.weatherIn} (.+)`, 'i'),
+                new RegExp(`${t.voiceCommands.temperatureIn} (.+)`, 'i')
+            ];
+
+            for (let pattern of patterns) {
+                const match = transcript.match(pattern);
+                if (match && match[1]) {
+                    return match[1].trim();
+                }
+            }
+            return null;
+        }
+
+        function speakText(text) {
+            if (!voiceReadingEnabled) {
+                return; // Don't speak if voice reading is disabled
+            }
+            
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = 0.9;
+                utterance.pitch = 1.1;
+                utterance.volume = 0.8;
+                
+                // Set language for speech synthesis
+                utterance.lang = currentLanguage === 'en' ? 'en-US' : currentLanguage === 'de' ? 'de-DE' : currentLanguage === 'uk' ? 'uk-UA' : 'he-IL';
+                
+                // Try to use a female voice if available
+                const voices = speechSynthesis.getVoices();
+                const femaleVoice = voices.find(voice => 
+                    voice.lang.startsWith(currentLanguage) && 
+                    (voice.name.includes('female') || voice.name.includes('Samantha'))
+                );
+                if (femaleVoice) {
+                    utterance.voice = femaleVoice;
+                }
+                
+                speechSynthesis.speak(utterance);
+            }
+        }
+
+        function initMap() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const userLocation = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude,
+                        };
+                        createMap(userLocation, 12);
+                        placeMarker(userLocation);
+                        getWeatherFromCoordinates(userLocation.lat, userLocation.lng);
+                    },
+                    () => {
+                        // Geolocation failed or was denied
+                        const defaultLocation = { lat: 51.0833, lng: 6.8833 };
+                        createMap(defaultLocation, 10);
+                        getWeatherFromCoordinates(defaultLocation.lat, defaultLocation.lng);
+                    }
+                );
+            } else {
+                // Browser doesn't support Geolocation
+                const defaultLocation = { lat: 51.0833, lng: 6.8833 };
+                createMap(defaultLocation, 10);
+                getWeatherFromCoordinates(defaultLocation.lat, defaultLocation.lng);
+            }
+        }
+
+        function createMap(center, zoom) {
+            // Create map with OpenStreetMap tiles
+            map = L.map('map').setView([center.lat, center.lng], zoom);
+            
+            // Add OpenStreetMap tiles with custom styling
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 19
+            }).addTo(map);
+
+            // Add click listener to map
+            map.on('click', function(event) {
+                placeMarker(event.latlng);
+                getWeatherFromCoordinates(event.latlng.lat, event.latlng.lng);
+            });
+        }
+
+        function placeMarker(location) {
+            if (marker) {
+                map.removeLayer(marker);
+            }
+            
+            // Create custom pink marker
+            const pinkIcon = L.divIcon({
+                className: 'custom-marker',
+                html: '<div style="background: linear-gradient(45deg, #ff69b4, #ff1493); width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>',
+                iconSize: [20, 20],
+                iconAnchor: [10, 10]
+            });
+            
+            marker = L.marker([location.lat, location.lng], { icon: pinkIcon }).addTo(map);
+        }
+
+        function getWeatherFromCoordinates(lat, lng) {
+            const resultsDiv = document.getElementById('weather-results');
+            resultsDiv.innerHTML = '<div class="loading">Loading weather data...</div>';
+
+            fetch(`/weather?lat=${lat}&lng=${lng}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        resultsDiv.innerHTML = `<div class="error">Error: ${data.error}</div>`;
+                        speakText(translations[currentLanguage].voiceResponses.weatherError);
+                        return;
+                    }
+                    displayWeather(data);
+                    speakWeatherData(data);
+                })
+                .catch(error => {
+                    resultsDiv.innerHTML = `<div class="error">${translations[currentLanguage].voiceResponses.unexpectedError}</div>`;
+                    speakText(translations[currentLanguage].voiceResponses.weatherError);
+                });
+        }
+
+        function getWeatherFromInput() {
+            const city = document.getElementById('city').value;
+            if (!city) return;
+
+            const resultsDiv = document.getElementById('weather-results');
+            resultsDiv.innerHTML = '<div class="loading">Loading weather data...</div>';
+
+            fetch(`/weather?city=${encodeURIComponent(city)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        resultsDiv.innerHTML = `<div class="error">Error: ${data.error}</div>`;
+                        speakText(translations[currentLanguage].voiceResponses.weatherError);
+                        return;
+                    }
+                    displayWeather(data);
+                    speakWeatherData(data);
+                    
+                    // Update map marker to the city location
+                    if (data.coord) {
+                        const latLng = { lat: data.coord.lat, lng: data.coord.lon };
+                        placeMarker(latLng);
+                        map.setView([latLng.lat, latLng.lng], 12);
+                    }
+                })
+                .catch(error => {
+                    resultsDiv.innerHTML = `<div class="error">${translations[currentLanguage].voiceResponses.unexpectedError}</div>`;
+                    speakText(translations[currentLanguage].voiceResponses.weatherError);
+                });
+        }
+
+        function speakWeatherData(data) {
+            const t = translations[currentLanguage];
+            const weatherDesc = data.weather[0].description;
+            const temp = Math.round(data.main.temp);
+            const humidity = data.main.humidity;
+            const windSpeed = data.wind.speed;
+            
+            const speechText = `${t.weatherIn} ${data.name}: ${weatherDesc}. ${t.temperature} ${t.is} ${temp} ${t.degreesCelsius}. ${t.humidity} ${t.is} ${humidity} ${t.percent}. ${t.windSpeed} ${t.is} ${windSpeed} ${t.metersPerSecond}.`;
+            speakText(speechText);
+        }
+
+        function displayWeather(data) {
+            const t = translations[currentLanguage];
+            const resultsDiv = document.getElementById('weather-results');
+            resultsDiv.innerHTML = `
+                <div class="weather-card">
+                    <h2>🌸 ${data.name}</h2>
+                    <p>🌡️ ${t.temperature}: ${data.main.temp}°C</p>
+                    <p>☁️ ${t.weather}: ${data.weather[0].main} (${data.weather[0].description})</p>
+                    <p>💧 ${t.humidity}: ${data.main.humidity}%</p>
+                    <p>💨 ${t.windSpeed}: ${data.wind.speed} m/s</p>
+                    <p>📍 ${t.coordinates}: ${data.coord.lat.toFixed(4)}, ${data.coord.lon.toFixed(4)}</p>
+                </div>
+            `;
+            
+            // Add cloud overlay based on weather conditions
+            updateCloudOverlay(data);
+        }
+
+        function updateCloudOverlay(weatherData) {
+            // Remove existing cloud overlay
+            if (window.cloudOverlay) {
+                map.removeLayer(window.cloudOverlay);
+            }
+            
+            const weatherMain = weatherData.weather[0].main.toLowerCase();
+            const weatherDesc = weatherData.weather[0].description.toLowerCase();
+            
+            // Determine cloud coverage based on weather
+            let cloudOpacity = 0;
+            let cloudColor = '#ffffff';
+            
+            if (weatherMain.includes('cloud') || weatherDesc.includes('cloud')) {
+                if (weatherDesc.includes('overcast') || weatherDesc.includes('broken')) {
+                    cloudOpacity = 0.6;
+                } else if (weatherDesc.includes('scattered') || weatherDesc.includes('few')) {
+                    cloudOpacity = 0.3;
+                } else {
+                    cloudOpacity = 0.4;
+                }
+            } else if (weatherMain.includes('rain') || weatherMain.includes('drizzle')) {
+                cloudOpacity = 0.7;
+                cloudColor = '#b0c4de';
+            } else if (weatherMain.includes('snow')) {
+                cloudOpacity = 0.5;
+                cloudColor = '#f0f8ff';
+            } else if (weatherMain.includes('fog') || weatherMain.includes('mist')) {
+                cloudOpacity = 0.8;
+                cloudColor = '#d3d3d3';
+            }
+            
+            if (cloudOpacity > 0) {
+                // Create cloud overlay using Leaflet's ImageOverlay
+                const bounds = map.getBounds();
+                const cloudOverlayUrl = createCloudPattern(cloudColor, cloudOpacity);
+                
+                window.cloudOverlay = L.imageOverlay(cloudOverlayUrl, bounds, {
+                    opacity: cloudOpacity,
+                    interactive: false
+                }).addTo(map);
+            }
+        }
+
+        function createCloudPattern(color, opacity) {
+            // Create a canvas with cloud pattern
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 512;
+            const ctx = canvas.getContext('2d');
+            
+            // Set background
+            ctx.fillStyle = 'transparent';
+            ctx.fillRect(0, 0, 512, 512);
+            
+            // Draw cloud pattern
+            ctx.fillStyle = color;
+            ctx.globalAlpha = opacity;
+            
+            // Create multiple cloud shapes
+            for (let i = 0; i < 15; i++) {
+                const x = Math.random() * 512;
+                const y = Math.random() * 512;
+                const size = 30 + Math.random() * 60;
+                
+                // Draw cloud shape
+                ctx.beginPath();
+                ctx.arc(x, y, size, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                // Add smaller circles for cloud texture
+                for (let j = 0; j < 3; j++) {
+                    const offsetX = (Math.random() - 0.5) * size;
+                    const offsetY = (Math.random() - 0.5) * size;
+                    const smallSize = size * 0.6;
+                    ctx.beginPath();
+                    ctx.arc(x + offsetX, y + offsetY, smallSize, 0, 2 * Math.PI);
+                    ctx.fill();
+                }
+            }
+            
+            return canvas.toDataURL();
+        }
+
+        // Handle Enter key in input field
+        document.getElementById('city').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                getWeatherFromInput();
+            }
+        });
+
+        // Handle voice toggle change
+        document.getElementById('voiceToggle').addEventListener('change', toggleVoiceReading);
+
+        // Initialize map when page loads
+        initMap();
+        
+        // Initialize speech recognition
+        initSpeechRecognition();
+        
+        // Load saved preferences
+        loadPreferences();
+    </script>
+</body>
+</html> 
