@@ -589,6 +589,35 @@
             margin-left: 0;
             margin-right: 15px;
         }
+        
+        /* Debug Voices Button Styling */
+        .debug-voices-btn {
+            background: linear-gradient(45deg, #ff69b4, #ff1493);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-left: 15px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(255, 105, 180, 0.3);
+        }
+        
+        .debug-voices-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 105, 180, 0.4);
+        }
+        
+        .debug-voices-btn:active {
+            transform: translateY(0);
+        }
+        
+        [dir="rtl"] .debug-voices-btn {
+            margin-left: 0;
+            margin-right: 15px;
+        }
     </style>
 </head>
 <body>
@@ -631,6 +660,9 @@
             </label>
             <button id="testSpeechBtn" onclick="testSpeech()" class="test-speech-btn" title="Test speech functionality">
                 🔊 Test
+            </button>
+            <button id="debugVoicesBtn" onclick="debugVoices()" class="debug-voices-btn" title="Show available voices">
+                🔍 Debug
             </button>
         </div>
         
@@ -1069,6 +1101,7 @@
                 speechSynthesis.onvoiceschanged = function() {
                     voices = speechSynthesis.getVoices();
                     console.log('Voices loaded:', voices.length);
+                    console.log('Available voices:', voices.map(v => `${v.name} (${v.lang})`));
                 };
                 
                 // Force load voices (iOS workaround)
@@ -1078,6 +1111,7 @@
                     setTimeout(() => {
                         voices = speechSynthesis.getVoices();
                         console.log('Voices loaded after delay:', voices.length);
+                        console.log('Available voices:', voices.map(v => `${v.name} (${v.lang})`));
                     }, 100);
                 }
                 
@@ -1088,14 +1122,60 @@
             }
         }
 
-        // Handle user interaction for iOS speech synthesis
-        function handleUserInteraction() {
-            if ('speechSynthesis' in window && speechSynthesis.paused) {
-                speechSynthesis.resume();
+        // Get best available voice for the current language
+        function getBestVoice(lang) {
+            if (voices.length === 0) {
+                console.log('No voices available');
+                return null;
             }
+            
+            console.log(`Looking for voice for language: ${lang}`);
+            console.log('Available voices:', voices.map(v => `${v.name} (${v.lang})`));
+            
+            // Try to find exact language match
+            let voice = voices.find(v => v.lang === lang);
+            if (voice) {
+                console.log(`Found exact match: ${voice.name} (${voice.lang})`);
+                return voice;
+            }
+            
+            // Try to find language family match (e.g., 'uk' for 'uk-UA')
+            const langFamily = lang.split('-')[0];
+            voice = voices.find(v => v.lang.startsWith(langFamily));
+            if (voice) {
+                console.log(`Found language family match: ${voice.name} (${voice.lang})`);
+                return voice;
+            }
+            
+            // For Cyrillic and Hebrew, try to find any available voice
+            if (langFamily === 'uk' || langFamily === 'he') {
+                // Try to find any voice that might work
+                voice = voices.find(v => v.lang.includes('ru') || v.lang.includes('he') || v.lang.includes('uk'));
+                if (voice) {
+                    console.log(`Found fallback voice for ${langFamily}: ${voice.name} (${voice.lang})`);
+                    return voice;
+                }
+                
+                // Last resort: use any available voice
+                voice = voices[0];
+                console.log(`Using fallback voice: ${voice.name} (${voice.lang})`);
+                return voice;
+            }
+            
+            // For other languages, try English as fallback
+            voice = voices.find(v => v.lang.startsWith('en'));
+            if (voice) {
+                console.log(`Using English fallback: ${voice.name} (${voice.lang})`);
+                return voice;
+            }
+            
+            // Last resort: use first available voice
+            voice = voices[0];
+            console.log(`Using first available voice: ${voice.name} (${voice.lang})`);
+            return voice;
         }
 
-        // iOS-compatible speech function
+        // iOS-compatible speech function with improved voice selection
         function speakText(text) {
             if (!voiceReadingEnabled) {
                 return; // Don't speak if voice reading is disabled
@@ -1111,19 +1191,19 @@
                 utterance.volume = 0.8;
                 
                 // Set language for speech synthesis
-                utterance.lang = currentLanguage === 'en' ? 'en-US' : 
-                               currentLanguage === 'de' ? 'de-DE' : 
-                               currentLanguage === 'uk' ? 'uk-UA' : 'he-IL';
+                const targetLang = currentLanguage === 'en' ? 'en-US' : 
+                                 currentLanguage === 'de' ? 'de-DE' : 
+                                 currentLanguage === 'uk' ? 'uk-UA' : 'he-IL';
                 
-                // Try to use a female voice if available
-                if (voices.length > 0) {
-                    const femaleVoice = voices.find(voice => 
-                        voice.lang.startsWith(currentLanguage) && 
-                        (voice.name.includes('female') || voice.name.includes('Samantha'))
-                    );
-                    if (femaleVoice) {
-                        utterance.voice = femaleVoice;
-                    }
+                utterance.lang = targetLang;
+                
+                // Get the best available voice
+                const bestVoice = getBestVoice(targetLang);
+                if (bestVoice) {
+                    utterance.voice = bestVoice;
+                    console.log(`Using voice: ${bestVoice.name} (${bestVoice.lang}) for text: ${text.substring(0, 50)}...`);
+                } else {
+                    console.log('No suitable voice found, using default');
                 }
                 
                 // iOS-specific event handlers
@@ -1137,6 +1217,19 @@
                 
                 utterance.onerror = function(event) {
                     console.error('Speech error:', event.error);
+                    console.error('Error details:', event);
+                    
+                    // Try fallback for specific errors
+                    if (event.error === 'not-allowed' || event.error === 'network') {
+                        console.log('Trying fallback speech method...');
+                        tryFallbackSpeech(text);
+                    } else if (currentLanguage === 'uk' || currentLanguage === 'he') {
+                        // For Cyrillic and Hebrew, try transliteration fallback
+                        console.log('Trying transliteration fallback...');
+                        tryFallbackSpeechWithTransliteration(text);
+                    } else {
+                        tryFallbackSpeech(text);
+                    }
                 };
                 
                 // Speak with iOS workaround
@@ -1144,7 +1237,84 @@
                     speechSynthesis.speak(utterance);
                 } catch (error) {
                     console.error('Speech synthesis error:', error);
+                    if (currentLanguage === 'uk' || currentLanguage === 'he') {
+                        tryFallbackSpeechWithTransliteration(text);
+                    } else {
+                        tryFallbackSpeech(text);
+                    }
                 }
+            }
+        }
+
+        // Fallback speech method for when primary speech fails
+        function tryFallbackSpeech(text) {
+            console.log('Attempting fallback speech method');
+            
+            if ('speechSynthesis' in window && speechSynthesis) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = 0.8;
+                utterance.pitch = 1.0;
+                utterance.volume = 1.0;
+                
+                // Use English as fallback language
+                utterance.lang = 'en-US';
+                
+                // Try to use any available voice
+                if (voices.length > 0) {
+                    utterance.voice = voices[0];
+                }
+                
+                utterance.onerror = function(event) {
+                    console.error('Fallback speech also failed:', event.error);
+                };
+                
+                try {
+                    speechSynthesis.speak(utterance);
+                } catch (error) {
+                    console.error('Fallback speech synthesis failed:', error);
+                }
+            }
+        }
+
+        // Enhanced fallback speech with transliteration
+        function tryFallbackSpeechWithTransliteration(text) {
+            console.log('Attempting fallback speech with transliteration');
+            
+            if ('speechSynthesis' in window && speechSynthesis) {
+                // Try transliteration for Cyrillic and Hebrew
+                let fallbackText = text;
+                if (currentLanguage === 'uk' || currentLanguage === 'he') {
+                    fallbackText = transliterateText(text, currentLanguage);
+                    console.log(`Transliterated text: ${fallbackText}`);
+                }
+                
+                const utterance = new SpeechSynthesisUtterance(fallbackText);
+                utterance.rate = 0.7; // Slower for transliterated text
+                utterance.pitch = 1.0;
+                utterance.volume = 1.0;
+                utterance.lang = 'en-US';
+                
+                // Try to use any available voice
+                if (voices.length > 0) {
+                    utterance.voice = voices[0];
+                }
+                
+                utterance.onerror = function(event) {
+                    console.error('Transliterated fallback speech failed:', event.error);
+                };
+                
+                try {
+                    speechSynthesis.speak(utterance);
+                } catch (error) {
+                    console.error('Transliterated fallback speech synthesis failed:', error);
+                }
+            }
+        }
+
+        // Handle user interaction for iOS speech synthesis
+        function handleUserInteraction() {
+            if ('speechSynthesis' in window && speechSynthesis.paused) {
+                speechSynthesis.resume();
             }
         }
 
@@ -1152,6 +1322,61 @@
         function testSpeech() {
             const testText = translations[currentLanguage].voiceResponses.testSpeech || "Hello, this is a test.";
             speakText(testText);
+        }
+
+        // Debug function to show available voices
+        function debugVoices() {
+            console.log('=== Voice Debug Information ===');
+            console.log('Current language:', currentLanguage);
+            console.log('Total voices available:', voices.length);
+            
+            if (voices.length === 0) {
+                console.log('No voices available - this might be an iOS issue');
+                alert('No voices available. This is common on iOS Chrome. Try tapping the screen first, then test again.');
+                return;
+            }
+            
+            console.log('All available voices:');
+            voices.forEach((voice, index) => {
+                console.log(`${index + 1}. ${voice.name} (${voice.lang}) - Default: ${voice.default}`);
+            });
+            
+            // Show in alert for mobile debugging
+            const voiceList = voices.map(v => `${v.name} (${v.lang})`).join('\n');
+            alert(`Available voices (${voices.length}):\n\n${voiceList}`);
+        }
+
+        // Simple transliteration for better voice compatibility
+        function transliterateText(text, fromLang) {
+            if (fromLang === 'uk') {
+                // Basic Cyrillic to Latin transliteration
+                const cyrillicToLatin = {
+                    'а': 'a', 'б': 'b', 'в': 'v', 'г': 'h', 'ґ': 'g', 'д': 'd', 'е': 'e', 'є': 'ye',
+                    'ж': 'zh', 'з': 'z', 'и': 'y', 'і': 'i', 'ї': 'yi', 'й': 'y', 'к': 'k', 'л': 'l',
+                    'м': 'm', 'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u',
+                    'ф': 'f', 'х': 'kh', 'ц': 'ts', 'ч': 'ch', 'ш': 'sh', 'щ': 'shch', 'ь': '',
+                    'ю': 'yu', 'я': 'ya',
+                    'А': 'A', 'Б': 'B', 'В': 'V', 'Г': 'H', 'Ґ': 'G', 'Д': 'D', 'Е': 'E', 'Є': 'Ye',
+                    'Ж': 'Zh', 'З': 'Z', 'И': 'Y', 'І': 'I', 'Ї': 'Yi', 'Й': 'Y', 'К': 'K', 'Л': 'L',
+                    'М': 'M', 'Н': 'N', 'О': 'O', 'П': 'P', 'Р': 'R', 'С': 'S', 'Т': 'T', 'У': 'U',
+                    'Ф': 'F', 'Х': 'Kh', 'Ц': 'Ts', 'Ч': 'Ch', 'Ш': 'Sh', 'Щ': 'Shch',
+                    'Ю': 'Yu', 'Я': 'Ya'
+                };
+                
+                return text.split('').map(char => cyrillicToLatin[char] || char).join('');
+            } else if (fromLang === 'he') {
+                // Basic Hebrew to Latin transliteration
+                const hebrewToLatin = {
+                    'א': 'a', 'ב': 'b', 'ג': 'g', 'ד': 'd', 'ה': 'h', 'ו': 'v', 'ז': 'z', 'ח': 'ch',
+                    'ט': 't', 'י': 'y', 'כ': 'k', 'ל': 'l', 'מ': 'm', 'נ': 'n', 'ס': 's', 'ע': 'a',
+                    'פ': 'p', 'צ': 'ts', 'ק': 'k', 'ר': 'r', 'ש': 'sh', 'ת': 't',
+                    'ם': 'm', 'ן': 'n', 'ץ': 'ts', 'ף': 'f', 'ך': 'ch'
+                };
+                
+                return text.split('').map(char => hebrewToLatin[char] || char).join('');
+            }
+            
+            return text;
         }
 
         function initMap() {
