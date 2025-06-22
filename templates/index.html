@@ -921,6 +921,9 @@
             document.querySelector('button[onclick="getWeatherFromInput()"]').textContent = t.getWeather;
             document.getElementById('voiceText').textContent = t.voice;
             
+            // Update voice toggle text
+            updateVoiceToggleUI();
+            
             // Update voice status
             document.getElementById('voiceStatusText').textContent = t.listening;
             
