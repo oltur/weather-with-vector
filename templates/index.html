@@ -981,6 +981,23 @@
                 metersPerSecond: "meters per second",
                 is: "is",
                 voiceReading: "Voice Reading",
+                weatherConditions: {
+                    clear: "Clear",
+                    clouds: "Cloudy",
+                    rain: "Rain",
+                    drizzle: "Drizzle",
+                    thunderstorm: "Thunderstorm",
+                    snow: "Snow",
+                    mist: "Mist",
+                    smoke: "Smoke",
+                    haze: "Haze",
+                    dust: "Dust",
+                    fog: "Fog",
+                    sand: "Sand",
+                    ash: "Ash",
+                    squall: "Squall",
+                    tornado: "Tornado"
+                },
                 voiceCommands: {
                     weatherIn: "weather in",
                     temperatureIn: "temperature in",
@@ -1023,6 +1040,23 @@
                 metersPerSecond: "Meter pro Sekunde",
                 is: "ist",
                 voiceReading: "Sprachausgabe",
+                weatherConditions: {
+                    clear: "Klar",
+                    clouds: "Bewölkt",
+                    rain: "Regen",
+                    drizzle: "Nieselregen",
+                    thunderstorm: "Gewitter",
+                    snow: "Schnee",
+                    mist: "Nebel",
+                    smoke: "Rauch",
+                    haze: "Dunst",
+                    dust: "Staub",
+                    fog: "Nebel",
+                    sand: "Sand",
+                    ash: "Asche",
+                    squall: "Bö",
+                    tornado: "Tornado"
+                },
                 voiceCommands: {
                     weatherIn: "wetter in",
                     temperatureIn: "temperatur in",
@@ -1065,6 +1099,23 @@
                 metersPerSecond: "метрів за секунду",
                 is: "є",
                 voiceReading: "Голосове читання",
+                weatherConditions: {
+                    clear: "Ясно",
+                    clouds: "Хмарно",
+                    rain: "Дощ",
+                    drizzle: "Мряка",
+                    thunderstorm: "Гроза",
+                    snow: "Сніг",
+                    mist: "Туман",
+                    smoke: "Дим",
+                    haze: "Мгла",
+                    dust: "Пил",
+                    fog: "Туман",
+                    sand: "Пісок",
+                    ash: "Попіл",
+                    squall: "Шквал",
+                    tornado: "Торнадо"
+                },
                 voiceCommands: {
                     weatherIn: "погода в",
                     temperatureIn: "температура в",
@@ -1107,6 +1158,23 @@
                 metersPerSecond: "מטרים לשנייה",
                 is: "היא",
                 voiceReading: "קריאה קולית",
+                weatherConditions: {
+                    clear: "בהיר",
+                    clouds: "מעונן",
+                    rain: "גשם",
+                    drizzle: "טפטוף",
+                    thunderstorm: "סופה",
+                    snow: "שלג",
+                    mist: "ערפל",
+                    smoke: "עשן",
+                    haze: "ערפל",
+                    dust: "אבק",
+                    fog: "ערפל",
+                    sand: "חול",
+                    ash: "אפר",
+                    squall: "רוח חזקה",
+                    tornado: "טורנדו"
+                },
                 voiceCommands: {
                     weatherIn: "מזג אוויר ב",
                     temperatureIn: "טמפרטורה ב",
@@ -1173,6 +1241,22 @@
             const loadingDiv = document.querySelector('.loading');
             if (loadingDiv && loadingDiv.textContent.includes('Detecting')) {
                 loadingDiv.textContent = t.detectingLocation;
+            }
+            
+            // Refresh weather display if weather data exists
+            const weatherCard = document.querySelector('.weather-card');
+            if (weatherCard) {
+                // Get the last weather data from the card and redisplay it
+                const weatherText = weatherCard.querySelector('p:nth-child(3)').textContent;
+                const match = weatherText.match(/☁️ .*?: (.+?) \(/);
+                if (match) {
+                    const originalWeather = match[1];
+                    // Find the original weather data and redisplay
+                    const lastWeatherData = window.lastWeatherData;
+                    if (lastWeatherData) {
+                        displayWeather(lastWeatherData);
+                    }
+                }
             }
         }
 
@@ -1551,11 +1635,18 @@
         function displayWeather(data) {
             const t = translations[currentLanguage];
             const resultsDiv = document.getElementById('weather-results');
+            
+            // Store last weather data for language switching
+            window.lastWeatherData = data;
+            
+            // Translate weather condition
+            const translatedWeather = translateWeatherCondition(data.weather[0].main);
+            
             resultsDiv.innerHTML = `
                 <div class="weather-card">
                     <h2>🌸 ${data.name}</h2>
                     <p>🌡️ ${t.temperature}: ${data.main.temp}°C</p>
-                    <p>☁️ ${t.weather}: ${data.weather[0].main} (${data.weather[0].description})</p>
+                    <p>☁️ ${t.weather}: ${translatedWeather} (${data.weather[0].description})</p>
                     <p>💧 ${t.humidity}: ${data.main.humidity}%</p>
                     <p>💨 ${t.windSpeed}: ${data.wind.speed} m/s</p>
                     <p>📍 ${t.coordinates}: ${data.coord.lat.toFixed(4)}, ${data.coord.lon.toFixed(4)}</p>
@@ -1760,6 +1851,18 @@
             const body = document.body;
             body.classList.remove('sunny', 'rainy', 'cloudy', 'snowy', 'foggy', 'night');
             console.log('Reset background to default');
+        }
+
+        // Translate weather conditions
+        function translateWeatherCondition(weatherMain) {
+            const t = translations[currentLanguage];
+            const weatherConditions = t.weatherConditions || {};
+            
+            // Convert to lowercase for matching
+            const condition = weatherMain.toLowerCase();
+            
+            // Return translated condition or fallback to original
+            return weatherConditions[condition] || weatherMain;
         }
     </script>
 </body>
