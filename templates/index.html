@@ -589,6 +589,59 @@
             margin-left: 0;
             margin-right: 15px;
         }
+        
+        /* Voice Selector Styling */
+        .voice-selector-container {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 182, 193, 0.3);
+        }
+        
+        .voice-selector-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        .voice-selector {
+            width: 100%;
+            max-width: 300px;
+            padding: 12px 15px;
+            border: 2px solid rgba(255, 182, 193, 0.5);
+            border-radius: 25px;
+            background: white;
+            font-size: 14px;
+            font-weight: 500;
+            color: #2c3e50;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(255, 182, 193, 0.2);
+        }
+        
+        .voice-selector:focus {
+            outline: none;
+            border-color: #ff69b4;
+            box-shadow: 0 4px 12px rgba(255, 105, 180, 0.3);
+        }
+        
+        .voice-selector:hover {
+            border-color: #ff69b4;
+            transform: translateY(-1px);
+        }
+        
+        .voice-selector option {
+            padding: 8px;
+            background: white;
+            color: #2c3e50;
+        }
+        
+        [dir="rtl"] .voice-selector {
+            text-align: right;
+        }
     </style>
 </head>
 <body>
@@ -634,6 +687,16 @@
             </button>
         </div>
         
+        <!-- Voice Selector -->
+        <div class="voice-selector-container">
+            <label for="voiceSelector" class="voice-selector-label">
+                <span id="voiceSelectorText">Voice</span>
+            </label>
+            <select id="voiceSelector" class="voice-selector" onchange="onVoiceChange()">
+                <option value="">Loading voices...</option>
+            </select>
+        </div>
+        
         <!-- Voice Status Display -->
         <div id="voiceStatus" class="voice-status" style="display: none;">
             <div class="voice-indicator">
@@ -660,11 +723,13 @@
         // Speech synthesis variables
         let speechSynthesis = window.speechSynthesis;
         let voices = [];
+        let selectedVoices = {}; // Store selected voice for each language
 
         // Load saved preferences from localStorage
         function loadPreferences() {
             const savedLanguage = localStorage.getItem('weatherAppLanguage');
             const savedVoiceReading = localStorage.getItem('weatherAppVoiceReading');
+            const savedSelectedVoices = localStorage.getItem('weatherAppSelectedVoices');
             
             if (savedLanguage) {
                 currentLanguage = savedLanguage;
@@ -672,6 +737,14 @@
             
             if (savedVoiceReading !== null) {
                 voiceReadingEnabled = savedVoiceReading === 'true';
+            }
+            
+            if (savedSelectedVoices) {
+                try {
+                    selectedVoices = JSON.parse(savedSelectedVoices);
+                } catch (e) {
+                    selectedVoices = {};
+                }
             }
             
             // Update UI to reflect saved preferences
@@ -683,6 +756,7 @@
         function savePreferences() {
             localStorage.setItem('weatherAppLanguage', currentLanguage);
             localStorage.setItem('weatherAppVoiceReading', voiceReadingEnabled.toString());
+            localStorage.setItem('weatherAppSelectedVoices', JSON.stringify(selectedVoices));
         }
 
         // Update language UI to reflect current language
@@ -717,6 +791,65 @@
             voiceReadingEnabled = !voiceReadingEnabled;
             savePreferences();
             updateVoiceToggleUI();
+        }
+
+        // Voice selector functions
+        function populateVoiceSelector() {
+            const voiceSelector = document.getElementById('voiceSelector');
+            const currentLang = currentLanguage === 'en' ? 'en-US' : 
+                               currentLanguage === 'de' ? 'de-DE' : 
+                               currentLanguage === 'uk' ? 'uk-UA' : 'he-IL';
+            
+            // Clear existing options
+            voiceSelector.innerHTML = '';
+            
+            if (voices.length === 0) {
+                voiceSelector.innerHTML = '<option value="">No voices available</option>';
+                return;
+            }
+            
+            // Filter voices for current language
+            const langVoices = voices.filter(voice => 
+                voice.lang.startsWith(currentLanguage) || 
+                voice.lang === currentLang ||
+                (currentLanguage === 'uk' && (voice.lang.includes('ru') || voice.lang.includes('uk'))) ||
+                (currentLanguage === 'he' && voice.lang.includes('he'))
+            );
+            
+            // Add default option
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = 'Default voice';
+            voiceSelector.appendChild(defaultOption);
+            
+            // Add available voices
+            langVoices.forEach(voice => {
+                const option = document.createElement('option');
+                option.value = voice.name;
+                option.textContent = `${voice.name} (${voice.lang})`;
+                voiceSelector.appendChild(option);
+            });
+            
+            // Set selected voice
+            const selectedVoice = selectedVoices[currentLanguage] || '';
+            voiceSelector.value = selectedVoice;
+        }
+
+        function onVoiceChange() {
+            const voiceSelector = document.getElementById('voiceSelector');
+            selectedVoices[currentLanguage] = voiceSelector.value;
+            savePreferences();
+        }
+
+        function updateVoiceSelectorUI() {
+            const voiceSelectorText = document.getElementById('voiceSelectorText');
+            const t = translations[currentLanguage];
+            voiceSelectorText.textContent = t.voice || 'Voice';
+            
+            // Populate voice selector when voices are available
+            if (voices.length > 0) {
+                populateVoiceSelector();
+            }
         }
 
         // Translation dictionary
@@ -924,6 +1057,9 @@
             // Update voice toggle text
             updateVoiceToggleUI();
             
+            // Update voice selector text
+            updateVoiceSelectorUI();
+            
             // Update voice status
             document.getElementById('voiceStatusText').textContent = t.listening;
             
@@ -1072,6 +1208,9 @@
                 speechSynthesis.onvoiceschanged = function() {
                     voices = speechSynthesis.getVoices();
                     console.log('Voices loaded:', voices.length);
+                    
+                    // Populate voice selector when voices are available
+                    populateVoiceSelector();
                 };
                 
                 // Force load voices (iOS workaround)
@@ -1081,7 +1220,13 @@
                     setTimeout(() => {
                         voices = speechSynthesis.getVoices();
                         console.log('Voices loaded after delay:', voices.length);
+                        
+                        // Populate voice selector when voices are available
+                        populateVoiceSelector();
                     }, 100);
+                } else {
+                    // Populate voice selector immediately if voices are already available
+                    populateVoiceSelector();
                 }
                 
                 // iOS workaround: Resume speech synthesis if it was paused
@@ -1118,14 +1263,25 @@
                                currentLanguage === 'de' ? 'de-DE' : 
                                currentLanguage === 'uk' ? 'uk-UA' : 'he-IL';
                 
-                // Try to use a female voice if available
+                // Use selected voice if available
                 if (voices.length > 0) {
-                    const femaleVoice = voices.find(voice => 
-                        voice.lang.startsWith(currentLanguage) && 
-                        (voice.name.includes('female') || voice.name.includes('Samantha'))
-                    );
-                    if (femaleVoice) {
-                        utterance.voice = femaleVoice;
+                    const selectedVoiceName = selectedVoices[currentLanguage];
+                    if (selectedVoiceName) {
+                        const selectedVoice = voices.find(voice => voice.name === selectedVoiceName);
+                        if (selectedVoice) {
+                            utterance.voice = selectedVoice;
+                            console.log(`Using selected voice: ${selectedVoice.name} (${selectedVoice.lang})`);
+                        }
+                    } else {
+                        // Fallback to female voice if no specific voice is selected
+                        const femaleVoice = voices.find(voice => 
+                            voice.lang.startsWith(currentLanguage) && 
+                            (voice.name.includes('female') || voice.name.includes('Samantha'))
+                        );
+                        if (femaleVoice) {
+                            utterance.voice = femaleVoice;
+                            console.log(`Using fallback female voice: ${femaleVoice.name} (${femaleVoice.lang})`);
+                        }
                     }
                 }
                 
