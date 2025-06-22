@@ -256,10 +256,20 @@
         
         h1 {
             text-align: center;
-            color: #2c3e50;
+            color: #1a1a2e;
             font-size: 2.5em;
             margin-bottom: 30px;
             text-shadow: 2px 2px 4px rgba(255, 182, 193, 0.3);
+            background: linear-gradient(45deg, #d4145a, #c2185b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+        }
+        
+        /* Dark theme heading */
+        body.night h1 {
+            color: #ffffff;
             background: linear-gradient(45deg, #ff69b4, #ff1493);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -283,6 +293,13 @@
                 inset 0 1px 0 rgba(255, 255, 255, 0.8);
             background: linear-gradient(145deg, #fff5f5, #ffe4e1);
             transition: all 0.3s ease;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+        
+        .input-section input::placeholder {
+            color: #7f8c8d;
+            font-weight: 400;
         }
         
         .input-section input:focus {
@@ -292,6 +309,7 @@
                 inset 0 1px 0 rgba(255, 255, 255, 0.8),
                 0 0 0 3px rgba(255, 105, 180, 0.2);
             transform: translateY(-2px);
+            color: #1a1a2e;
         }
         
         .input-section button { 
@@ -299,13 +317,13 @@
             border: none;
             border-radius: 25px;
             font-size: 16px;
-            font-weight: 600;
-            background: linear-gradient(45deg, #ff69b4, #ff1493);
+            font-weight: 700;
+            background: linear-gradient(45deg, #d4145a, #c2185b);
             color: white;
             cursor: pointer;
             box-shadow: 
-                0 6px 12px rgba(255, 105, 180, 0.4),
-                0 2px 4px rgba(255, 182, 193, 0.2);
+                0 6px 12px rgba(212, 20, 90, 0.4),
+                0 2px 4px rgba(194, 24, 91, 0.2);
             transition: all 0.3s ease;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -314,15 +332,16 @@
         .input-section button:hover {
             transform: translateY(-3px);
             box-shadow: 
-                0 8px 16px rgba(255, 105, 180, 0.5),
-                0 4px 8px rgba(255, 182, 193, 0.3);
+                0 8px 16px rgba(212, 20, 90, 0.5),
+                0 4px 8px rgba(194, 24, 91, 0.3);
+            background: linear-gradient(45deg, #c2185b, #d4145a);
         }
         
         .input-section button:active {
             transform: translateY(-1px);
             box-shadow: 
-                0 4px 8px rgba(255, 105, 180, 0.4),
-                0 2px 4px rgba(255, 182, 193, 0.2);
+                0 4px 8px rgba(212, 20, 90, 0.4),
+                0 2px 4px rgba(194, 24, 91, 0.2);
         }
         
         #map { 
@@ -341,7 +360,7 @@
         /* Custom Leaflet Controls Styling */
         .leaflet-control-zoom {
             border: none !important;
-            box-shadow: 0 4px 8px rgba(255, 182, 193, 0.3) !important;
+            box-shadow: 0 4px 8px rgba(212, 20, 90, 0.3) !important;
         }
         
         .leaflet-control-zoom a {
@@ -381,13 +400,13 @@
         }
         
         .weather-card {
-            background: linear-gradient(135deg, #ff69b4 0%, #ff1493 100%);
+            background: linear-gradient(135deg, #d4145a 0%, #c2185b 100%);
             color: white;
             padding: 30px;
             border-radius: 20px;
             box-shadow: 
-                0 15px 30px rgba(255, 105, 180, 0.4),
-                0 5px 15px rgba(255, 182, 193, 0.3);
+                0 15px 30px rgba(212, 20, 90, 0.4),
+                0 5px 15px rgba(194, 24, 91, 0.3);
             text-align: center;
             width: 100%;
             max-width: 500px;
@@ -398,33 +417,43 @@
         .weather-card:hover {
             transform: perspective(1000px) rotateX(0deg) translateY(-5px);
             box-shadow: 
-                0 20px 40px rgba(255, 105, 180, 0.5),
-                0 10px 20px rgba(255, 182, 193, 0.4);
+                0 20px 40px rgba(212, 20, 90, 0.5),
+                0 10px 20px rgba(194, 24, 91, 0.4);
         }
         
         .weather-card h2 {
             font-size: 2em;
             margin-bottom: 20px;
-            text-shadow: 2px 2px 4px rgba(255, 182, 193, 0.5);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            font-weight: 700;
+            color: #ffffff;
         }
         
         .weather-card p {
             font-size: 1.2em;
             margin: 10px 0;
-            text-shadow: 1px 1px 2px rgba(255, 182, 193, 0.5);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+            font-weight: 600;
+            color: #ffffff;
         }
         
         .loading {
-            color: #ff69b4;
+            color: #d4145a;
             font-size: 1.2em;
-            font-weight: 600;
+            font-weight: 700;
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
         }
         
         .error {
-            color: #e91e63;
+            color: #e74c3c;
             font-size: 1.1em;
-            font-weight: 600;
+            font-weight: 700;
             text-align: center;
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+            background: rgba(231, 76, 60, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid rgba(231, 76, 60, 0.3);
         }
         
         @media (max-width: 768px) {
@@ -446,12 +475,14 @@
         
         /* Voice Interface Styling */
         .voice-btn {
-            background: linear-gradient(45deg, #ff69b4, #ff1493) !important;
+            background: linear-gradient(45deg, #d4145a, #c2185b) !important;
             margin-left: 10px;
+            font-weight: 700;
+            color: #ffffff;
         }
         
         .voice-btn.listening {
-            background: linear-gradient(45deg, #e91e63, #c2185b) !important;
+            background: linear-gradient(45deg, #e74c3c, #c0392b) !important;
             animation: pulse 1.5s infinite;
         }
         
@@ -468,6 +499,8 @@
             background: linear-gradient(145deg, #fff5f5, #ffe4e1);
             border-radius: 15px;
             box-shadow: 0 4px 8px rgba(255, 182, 193, 0.2);
+            color: #2c3e50;
+            font-weight: 600;
         }
         
         .voice-indicator {
@@ -480,7 +513,7 @@
         .pulse-ring {
             width: 20px;
             height: 20px;
-            border: 3px solid #ff69b4;
+            border: 3px solid #d4145a;
             border-radius: 50%;
             animation: pulse-ring 1.5s infinite;
         }
@@ -501,19 +534,26 @@
             border: none;
             border-radius: 20px;
             font-size: 16px;
-            font-weight: 600;
-            background: linear-gradient(45deg, #ff69b4, #ff1493);
+            font-weight: 700;
+            background: linear-gradient(45deg, #d4145a, #c2185b);
             color: white;
             cursor: pointer;
             box-shadow: 
-                0 6px 12px rgba(255, 105, 180, 0.4),
-                0 2px 4px rgba(255, 182, 193, 0.2);
+                0 6px 12px rgba(212, 20, 90, 0.4),
+                0 2px 4px rgba(194, 24, 91, 0.2);
             transition: all 0.3s ease;
             margin: 0 5px;
         }
         
         .lang-btn.active {
-            background: linear-gradient(45deg, #ff1493, #ff69b4);
+            background: linear-gradient(45deg, #c2185b, #d4145a);
+        }
+        
+        .lang-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                0 8px 16px rgba(212, 20, 90, 0.5),
+                0 4px 8px rgba(194, 24, 91, 0.3);
         }
         
         /* RTL Support for Hebrew */
@@ -623,22 +663,22 @@
         
         /* Test Speech Button Styling */
         .test-speech-btn {
-            background: linear-gradient(45deg, #ff69b4, #ff1493);
+            background: linear-gradient(45deg, #d4145a, #c2185b);
             color: white;
             border: none;
             padding: 8px 16px;
             border-radius: 20px;
             font-size: 14px;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
             margin-left: 15px;
             transition: all 0.3s ease;
-            box-shadow: 0 2px 8px rgba(255, 105, 180, 0.3);
+            box-shadow: 0 2px 8px rgba(212, 20, 90, 0.3);
         }
         
         .test-speech-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(255, 105, 180, 0.4);
+            box-shadow: 0 4px 12px rgba(212, 20, 90, 0.4);
         }
         
         .test-speech-btn:active {
@@ -655,48 +695,49 @@
             text-align: center;
             margin-bottom: 20px;
             padding: 15px;
-            background: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.9);
             border-radius: 15px;
-            border: 1px solid rgba(255, 182, 193, 0.3);
+            border: 1px solid rgba(212, 20, 90, 0.3);
         }
         
         .voice-selector-label {
             display: block;
-            font-weight: 600;
+            font-weight: 700;
             margin-bottom: 10px;
-            color: #2c3e50;
+            color: #1a1a2e;
         }
         
         .voice-selector {
             width: 100%;
             max-width: 300px;
             padding: 12px 15px;
-            border: 2px solid rgba(255, 182, 193, 0.5);
+            border: 2px solid rgba(212, 20, 90, 0.5);
             border-radius: 25px;
             background: white;
             font-size: 14px;
-            font-weight: 500;
-            color: #2c3e50;
+            font-weight: 600;
+            color: #1a1a2e;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 2px 8px rgba(255, 182, 193, 0.2);
+            box-shadow: 0 2px 8px rgba(212, 20, 90, 0.2);
         }
         
         .voice-selector:focus {
             outline: none;
-            border-color: #ff69b4;
-            box-shadow: 0 4px 12px rgba(255, 105, 180, 0.3);
+            border-color: #d4145a;
+            box-shadow: 0 4px 12px rgba(212, 20, 90, 0.3);
         }
         
         .voice-selector:hover {
-            border-color: #ff69b4;
+            border-color: #d4145a;
             transform: translateY(-1px);
         }
         
         .voice-selector option {
             padding: 8px;
             background: white;
-            color: #2c3e50;
+            color: #1a1a2e;
+            font-weight: 500;
         }
         
         [dir="rtl"] .voice-selector {
@@ -705,42 +746,78 @@
         
         /* Dark theme weather card */
         body.night .weather-card {
-            background: rgba(255, 255, 255, 0.1);
+            background: linear-gradient(135deg, #d4145a 0%, #c2185b 100%);
             border: 1px solid rgba(255, 255, 255, 0.2);
             color: #ffffff;
         }
         
         /* Dark theme input and buttons */
         body.night input[type="text"] {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.4);
             color: #ffffff;
+            font-weight: 600;
         }
         
         body.night input[type="text"]::placeholder {
-            color: rgba(255, 255, 255, 0.7);
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 400;
         }
         
         body.night button {
-            background: rgba(255, 255, 255, 0.1);
+            background: linear-gradient(45deg, #d4145a, #c2185b);
             border: 1px solid rgba(255, 255, 255, 0.3);
             color: #ffffff;
+            font-weight: 700;
         }
         
         body.night button:hover {
-            background: rgba(255, 255, 255, 0.2);
+            background: linear-gradient(45deg, #c2185b, #d4145a);
         }
         
         /* Dark theme voice selector */
         body.night .voice-selector {
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.4);
             color: #ffffff;
+            font-weight: 600;
         }
         
         body.night .voice-selector option {
             background: #1a1a2e;
             color: #ffffff;
+            font-weight: 500;
+        }
+        
+        /* Dark theme voice status */
+        body.night .voice-status {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            font-weight: 600;
+        }
+        
+        /* Dark theme voice selector container */
+        body.night .voice-selector-container {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        body.night .voice-selector-label {
+            color: #ffffff;
+            font-weight: 700;
+        }
+        
+        /* Dark theme loading and error messages */
+        body.night .loading {
+            color: #ff69b4;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+        }
+        
+        body.night .error {
+            color: #ff6b6b;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+            background: rgba(255, 107, 107, 0.2);
+            border: 2px solid rgba(255, 107, 107, 0.4);
         }
 
         .rain-animation {
@@ -801,6 +878,61 @@
           0% { top: -8vh; opacity: 0.7; }
           80% { opacity: 0.7; }
           100% { top: 110vh; opacity: 0; }
+        }
+        
+        /* Focus indicators for better accessibility */
+        .input-section input:focus,
+        .voice-selector:focus,
+        .lang-btn:focus,
+        .voice-btn:focus,
+        .test-speech-btn:focus {
+            outline: 3px solid #d4145a;
+            outline-offset: 2px;
+        }
+        
+        /* High contrast mode support */
+        @media (prefers-contrast: high) {
+            .container {
+                background: #ffffff;
+                border: 3px solid #000000;
+                color: #000000;
+            }
+            
+            body.night .container {
+                background: #000000;
+                border: 3px solid #ffffff;
+                color: #ffffff;
+            }
+            
+            .weather-card {
+                background: #d4145a;
+                border: 2px solid #ffffff;
+            }
+            
+            .input-section input {
+                background: #ffffff;
+                border: 2px solid #000000;
+                color: #000000;
+            }
+            
+            body.night .input-section input {
+                background: #000000;
+                border: 2px solid #ffffff;
+                color: #ffffff;
+            }
+        }
+        
+        /* Reduced motion support */
+        @media (prefers-reduced-motion: reduce) {
+            .cloud,
+            .weather-card,
+            .input-section button,
+            .lang-btn,
+            .voice-btn,
+            .test-speech-btn {
+                animation: none;
+                transition: none;
+            }
         }
     </style>
 </head>
