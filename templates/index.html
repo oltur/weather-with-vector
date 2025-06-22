@@ -1255,6 +1255,8 @@
                     const lastWeatherData = window.lastWeatherData;
                     if (lastWeatherData) {
                         displayWeather(lastWeatherData);
+                        // Also refresh the speech with translated weather
+                        refreshWeatherSpeech();
                     }
                 }
             }
@@ -1623,12 +1625,12 @@
 
         function speakWeatherData(data) {
             const t = translations[currentLanguage];
-            const weatherDesc = data.weather[0].description;
+            const translatedWeather = translateWeatherCondition(data.weather[0].main);
             const temp = Math.round(data.main.temp);
             const humidity = data.main.humidity;
             const windSpeed = data.wind.speed;
             
-            const speechText = `${t.weatherIn} ${data.name}: ${weatherDesc}. ${t.temperature} ${t.is} ${temp} ${t.degreesCelsius}. ${t.humidity} ${t.is} ${humidity} ${t.percent}. ${t.windSpeed} ${t.is} ${windSpeed} ${t.metersPerSecond}.`;
+            const speechText = `${t.weatherIn} ${data.name}: ${translatedWeather}. ${t.temperature} ${t.is} ${temp} ${t.degreesCelsius}. ${t.humidity} ${t.is} ${humidity} ${t.percent}. ${t.windSpeed} ${t.is} ${windSpeed} ${t.metersPerSecond}.`;
             speakText(speechText);
         }
 
@@ -1863,6 +1865,13 @@
             
             // Return translated condition or fallback to original
             return weatherConditions[condition] || weatherMain;
+        }
+
+        // Refresh speech with translated weather when language changes
+        function refreshWeatherSpeech() {
+            if (window.lastWeatherData) {
+                speakWeatherData(window.lastWeatherData);
+            }
         }
     </script>
 </body>
