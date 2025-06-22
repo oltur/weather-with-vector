@@ -18,6 +18,54 @@
             min-height: 100vh;
             overflow-x: hidden;
             position: relative;
+            transition: background 1s ease-in-out;
+        }
+        
+        /* Weather-based backgrounds */
+        body.sunny {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 50%, #fff8dc 100%);
+        }
+        
+        body.rainy {
+            background: linear-gradient(135deg, #4682b4 0%, #5f9ea0 50%, #87ceeb 100%);
+        }
+        
+        body.cloudy {
+            background: linear-gradient(135deg, #b0c4de 0%, #d3d3d3 50%, #f0f8ff 100%);
+        }
+        
+        body.snowy {
+            background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 50%, #ffffff 100%);
+        }
+        
+        body.foggy {
+            background: linear-gradient(135deg, #d3d3d3 0%, #c0c0c0 50%, #a9a9a9 100%);
+        }
+        
+        /* Night theme backgrounds */
+        body.night {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #ffffff;
+        }
+        
+        body.night.sunny {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        }
+        
+        body.night.rainy {
+            background: linear-gradient(135deg, #0f1419 0%, #1a1a2e 50%, #16213e 100%);
+        }
+        
+        body.night.cloudy {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        }
+        
+        body.night.snowy {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        }
+        
+        body.night.foggy {
+            background: linear-gradient(135deg, #0f1419 0%, #1a1a2e 50%, #16213e 100%);
         }
         
         /* Cloud Layer */
@@ -192,6 +240,18 @@
             transform: translateZ(0);
             position: relative;
             z-index: 2;
+            transition: all 0.5s ease-in-out;
+        }
+        
+        /* Dark theme container */
+        body.night .container {
+            background: rgba(26, 26, 46, 0.95);
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.3),
+                0 8px 16px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ffffff;
         }
         
         h1 {
@@ -641,6 +701,46 @@
         
         [dir="rtl"] .voice-selector {
             text-align: right;
+        }
+        
+        /* Dark theme weather card */
+        body.night .weather-card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+        }
+        
+        /* Dark theme input and buttons */
+        body.night input[type="text"] {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #ffffff;
+        }
+        
+        body.night input[type="text"]::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        body.night button {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #ffffff;
+        }
+        
+        body.night button:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Dark theme voice selector */
+        body.night .voice-selector {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: #ffffff;
+        }
+        
+        body.night .voice-selector option {
+            background: #1a1a2e;
+            color: #ffffff;
         }
     </style>
 </head>
@@ -1456,6 +1556,9 @@
                 </div>
             `;
             
+            // Update background based on weather and time
+            updateBackground(data);
+            
             // Add cloud overlay based on weather conditions
             updateCloudOverlay(data);
         }
@@ -1570,6 +1673,60 @@
         
         // Load saved preferences
         loadPreferences();
+
+        // Dynamic background functions
+        function updateBackground(weatherData) {
+            const body = document.body;
+            
+            // Remove existing weather and time classes
+            body.classList.remove('sunny', 'rainy', 'cloudy', 'snowy', 'foggy', 'night');
+            
+            // Determine weather condition
+            const weatherMain = weatherData.weather[0].main.toLowerCase();
+            const weatherDesc = weatherData.weather[0].description.toLowerCase();
+            
+            if (weatherMain.includes('clear') || weatherDesc.includes('clear')) {
+                body.classList.add('sunny');
+            } else if (weatherMain.includes('rain') || weatherMain.includes('drizzle') || weatherDesc.includes('rain')) {
+                body.classList.add('rainy');
+            } else if (weatherMain.includes('cloud') || weatherDesc.includes('cloud')) {
+                body.classList.add('cloudy');
+            } else if (weatherMain.includes('snow') || weatherDesc.includes('snow')) {
+                body.classList.add('snowy');
+            } else if (weatherMain.includes('fog') || weatherMain.includes('mist') || weatherDesc.includes('fog')) {
+                body.classList.add('foggy');
+            }
+            
+            // Check if it's night time
+            if (weatherData.sys && weatherData.sys.sunrise && weatherData.sys.sunset) {
+                const now = Math.floor(Date.now() / 1000);
+                const sunrise = weatherData.sys.sunrise;
+                const sunset = weatherData.sys.sunset;
+                
+                // It's night if current time is before sunrise or after sunset
+                if (now < sunrise || now > sunset) {
+                    body.classList.add('night');
+                }
+            }
+        }
+
+        function getWeatherCondition(weatherData) {
+            const weatherMain = weatherData.weather[0].main.toLowerCase();
+            const weatherDesc = weatherData.weather[0].description.toLowerCase();
+            
+            if (weatherMain.includes('clear') || weatherDesc.includes('clear')) {
+                return 'sunny';
+            } else if (weatherMain.includes('rain') || weatherMain.includes('drizzle') || weatherDesc.includes('rain')) {
+                return 'rainy';
+            } else if (weatherMain.includes('cloud') || weatherDesc.includes('cloud')) {
+                return 'cloudy';
+            } else if (weatherMain.includes('snow') || weatherDesc.includes('snow')) {
+                return 'snowy';
+            } else if (weatherMain.includes('fog') || weatherMain.includes('mist') || weatherDesc.includes('fog')) {
+                return 'foggy';
+            }
+            return 'default';
+        }
     </script>
 </body>
 </html> 
