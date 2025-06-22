@@ -808,13 +808,19 @@
                 return;
             }
             
-            // Filter voices for current language
-            const langVoices = voices.filter(voice => 
-                voice.lang.startsWith(currentLanguage) || 
-                voice.lang === currentLang ||
-                (currentLanguage === 'uk' && (voice.lang.includes('ru') || voice.lang.includes('uk'))) ||
-                (currentLanguage === 'he' && voice.lang.includes('he'))
-            );
+            // Filter voices for current language, excluding Russian voices
+            const langVoices = voices.filter(voice => {
+                // Always exclude Russian voices
+                if (voice.lang.includes('ru') || voice.lang.includes('RU')) {
+                    return false;
+                }
+                
+                // Filter by current language
+                return voice.lang.startsWith(currentLanguage) || 
+                       voice.lang === currentLang ||
+                       (currentLanguage === 'uk' && voice.lang.includes('uk')) ||
+                       (currentLanguage === 'he' && voice.lang.includes('he'));
+            });
             
             // Add default option
             const defaultOption = document.createElement('option');
