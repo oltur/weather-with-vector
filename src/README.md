@@ -189,3 +189,4 @@ Extend your MCP server with more tools easily:
 Visit the [Postman MCP Generator](https://postman.com/explore/mcp-generator) page for updates and new capabilities.
 
 Join the `#mcp-lab` channel in the [Postman Discord](https://discord.gg/HQJWM8YF) to share what you've built and get help.
+
