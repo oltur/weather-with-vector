@@ -1483,6 +1483,9 @@
             const resultsDiv = document.getElementById('weather-results');
             resultsDiv.innerHTML = '<div class="loading">Loading weather data...</div>';
 
+            // Reset background while loading
+            resetBackground();
+
             fetch(`/weather?lat=${lat}&lng=${lng}`)
                 .then(response => response.json())
                 .then(data => {
@@ -1506,6 +1509,9 @@
 
             const resultsDiv = document.getElementById('weather-results');
             resultsDiv.innerHTML = '<div class="loading">Loading weather data...</div>';
+
+            // Reset background while loading
+            resetBackground();
 
             fetch(`/weather?city=${encodeURIComponent(city)}`)
                 .then(response => response.json())
@@ -1678,6 +1684,9 @@
         function updateBackground(weatherData) {
             const body = document.body;
             
+            console.log('Updating background for location:', weatherData.name);
+            console.log('Weather condition:', weatherData.weather[0].main, weatherData.weather[0].description);
+            
             // Remove existing weather and time classes
             body.classList.remove('sunny', 'rainy', 'cloudy', 'snowy', 'foggy', 'night');
             
@@ -1685,17 +1694,25 @@
             const weatherMain = weatherData.weather[0].main.toLowerCase();
             const weatherDesc = weatherData.weather[0].description.toLowerCase();
             
+            let weatherClass = '';
             if (weatherMain.includes('clear') || weatherDesc.includes('clear')) {
                 body.classList.add('sunny');
+                weatherClass = 'sunny';
             } else if (weatherMain.includes('rain') || weatherMain.includes('drizzle') || weatherDesc.includes('rain')) {
                 body.classList.add('rainy');
+                weatherClass = 'rainy';
             } else if (weatherMain.includes('cloud') || weatherDesc.includes('cloud')) {
                 body.classList.add('cloudy');
+                weatherClass = 'cloudy';
             } else if (weatherMain.includes('snow') || weatherDesc.includes('snow')) {
                 body.classList.add('snowy');
+                weatherClass = 'snowy';
             } else if (weatherMain.includes('fog') || weatherMain.includes('mist') || weatherDesc.includes('fog')) {
                 body.classList.add('foggy');
+                weatherClass = 'foggy';
             }
+            
+            console.log('Applied weather class:', weatherClass);
             
             // Check if it's night time
             if (weatherData.sys && weatherData.sys.sunrise && weatherData.sys.sunset) {
@@ -1703,11 +1720,22 @@
                 const sunrise = weatherData.sys.sunrise;
                 const sunset = weatherData.sys.sunset;
                 
+                console.log('Current time:', new Date(now * 1000).toLocaleString());
+                console.log('Sunrise:', new Date(sunrise * 1000).toLocaleString());
+                console.log('Sunset:', new Date(sunset * 1000).toLocaleString());
+                
                 // It's night if current time is before sunrise or after sunset
                 if (now < sunrise || now > sunset) {
                     body.classList.add('night');
+                    console.log('Applied night class');
+                } else {
+                    console.log('Applied day class');
                 }
+            } else {
+                console.log('No sunrise/sunset data available');
             }
+            
+            console.log('Final body classes:', body.className);
         }
 
         function getWeatherCondition(weatherData) {
@@ -1726,6 +1754,12 @@
                 return 'foggy';
             }
             return 'default';
+        }
+
+        function resetBackground() {
+            const body = document.body;
+            body.classList.remove('sunny', 'rainy', 'cloudy', 'snowy', 'foggy', 'night');
+            console.log('Reset background to default');
         }
     </script>
 </body>
