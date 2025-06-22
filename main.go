@@ -12,6 +12,42 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func fetchWeather(city, lat, lng, apiKey string) (interface{}, error) {
+	if apiKey == "" {
+		return nil, fmt.Errorf("API key is not set")
+	}
+
+	var weatherURL string
+	if city != "" {
+		weatherURL = "http://api.openweathermap.org/data/2.5/weather?q=" + url.QueryEscape(city) + "&appid=" + apiKey + "&units=metric"
+	} else if lat != "" && lng != "" {
+		weatherURL = "http://api.openweathermap.org/data/2.5/weather?lat=" + lat + "&lon=" + lng + "&appid=" + apiKey + "&units=metric"
+	} else {
+		return nil, fmt.Errorf("Either city or lat/lng coordinates are required")
+	}
+
+	fmt.Println(weatherURL)
+	resp, err := http.Get(weatherURL)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to fetch weather data")
+	}
+	defer resp.Body.Close()
+
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to read response body")
+	}
+
+	log.Printf("Response Body: %s", string(bodyBytes))
+
+	var weatherData interface{}
+	if err := json.Unmarshal(bodyBytes, &weatherData); err != nil {
+		return nil, fmt.Errorf("Failed to parse weather data")
+	}
+
+	return weatherData, nil
+}
+
 func main() {
 	router := gin.Default()
 	router.LoadHTMLGlob("templates/*")
@@ -28,42 +64,15 @@ func main() {
 		lng := c.Query("lng")
 		apiKey := os.Getenv("OPENWEATHERMAP_API_KEY")
 
-		if apiKey == "" {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "API key is not set"})
-			return
-		}
-
-		var weatherURL string
-		if city != "" {
-			// City-based query
-			weatherURL = "http://api.openweathermap.org/data/2.5/weather?q=" + url.QueryEscape(city) + "&appid=" + apiKey + "&units=metric"
-		} else if lat != "" && lng != "" {
-			// Coordinate-based query
-			weatherURL = "http://api.openweathermap.org/data/2.5/weather?lat=" + lat + "&lon=" + lng + "&appid=" + apiKey + "&units=metric"
-		} else {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Either city or lat/lng coordinates are required"})
-			return
-		}
-
-		fmt.Println(weatherURL)
-		resp, err := http.Get(weatherURL)
+		weatherData, err := fetchWeather(city, lat, lng, apiKey)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch weather data"})
-			return
-		}
-		defer resp.Body.Close()
-
-		bodyBytes, err := io.ReadAll(resp.Body)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read response body"})
-			return
-		}
-
-		log.Printf("Response Body: %s", string(bodyBytes))
-
-		var weatherData interface{}
-		if err := json.Unmarshal(bodyBytes, &weatherData); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse weather data"})
+			if err.Error() == "API key is not set" {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			} else if err.Error() == "Either city or lat/lng coordinates are required" {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			} else {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			}
 			return
 		}
 

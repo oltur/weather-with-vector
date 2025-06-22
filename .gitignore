@@ -8,9 +8,6 @@
 *.out
 go.work
 
-# Go module files
-go.sum
-
 # IDE files
 .vscode/
 .idea/

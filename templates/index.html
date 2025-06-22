@@ -560,6 +560,35 @@
         .slider.round:before {
             border-radius: 50%;
         }
+        
+        /* Test Speech Button Styling */
+        .test-speech-btn {
+            background: linear-gradient(45deg, #ff69b4, #ff1493);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-left: 15px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(255, 105, 180, 0.3);
+        }
+        
+        .test-speech-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 105, 180, 0.4);
+        }
+        
+        .test-speech-btn:active {
+            transform: translateY(0);
+        }
+        
+        [dir="rtl"] .test-speech-btn {
+            margin-left: 0;
+            margin-right: 15px;
+        }
     </style>
 </head>
 <body>
@@ -600,6 +629,9 @@
                     <span class="slider"></span>
                 </div>
             </label>
+            <button id="testSpeechBtn" onclick="testSpeech()" class="test-speech-btn" title="Test speech functionality">
+                🔊 Test
+            </button>
         </div>
         
         <!-- Voice Status Display -->
@@ -624,6 +656,10 @@
         let recognition;
         let currentLanguage = 'en';
         let voiceReadingEnabled = true;
+
+        // Speech synthesis variables
+        let speechSynthesis = window.speechSynthesis;
+        let voices = [];
 
         // Load saved preferences from localStorage
         function loadPreferences() {
@@ -723,7 +759,8 @@
                     heard: "I heard:",
                     tryAgain: "Try saying \"weather in [city name]\" or \"help\" for commands.",
                     sorryError: "Sorry, I could not understand that. Please try again.",
-                    weatherError: "Sorry, there was an error getting the weather data."
+                    weatherError: "Sorry, there was an error getting the weather data.",
+                    testSpeech: "Hallo! Dies ist ein Test der Sprachfunktion. Wenn Sie das hören können, funktioniert die Sprachsynthese korrekt."
                 }
             },
             de: {
@@ -764,7 +801,8 @@
                     heard: "Ich habe gehört:",
                     tryAgain: "Versuchen Sie \"Wetter in [Stadtname]\" oder \"Hilfe\" für Befehle zu sagen.",
                     sorryError: "Entschuldigung, das konnte ich nicht verstehen. Bitte versuchen Sie es erneut.",
-                    weatherError: "Entschuldigung, beim Abrufen der Wetterdaten ist ein Fehler aufgetreten."
+                    weatherError: "Entschuldigung, beim Abrufen der Wetterdaten ist ein Fehler aufgetreten.",
+                    testSpeech: "Hallo! Dies ist ein Test der Sprachfunktion. Wenn Sie das hören können, funktioniert die Sprachsynthese korrekt."
                 }
             },
             uk: {
@@ -805,7 +843,8 @@
                     heard: "Я чую:",
                     tryAgain: "Спробуйте сказати \"погода в [назва міста]\" або \"допомога\" для команд.",
                     sorryError: "Вибачте, я не зрозумів це. Будь ласка, спробуйте ще раз.",
-                    weatherError: "Вибачте, сталася помилка при отриманні даних про погоду."
+                    weatherError: "Вибачте, сталася помилка при отриманні даних про погоду.",
+                    testSpeech: "Привіт! Це тест функції мовлення. Якщо ви це чуєте, синтез мовлення працює правильно."
                 }
             },
             he: {
@@ -846,7 +885,8 @@
                     heard: "שמעתי:",
                     tryAgain: "נסה לומר \"מזג אוויר ב [שם עיר]\" או \"עזרה\" לפקודות.",
                     sorryError: "מצטער, לא הצלחתי להבין את זה. אנא נסה שוב.",
-                    weatherError: "מצטער, אירעה שגיאה בקבלת נתוני מזג האוויר."
+                    weatherError: "מצטער, אירעה שגיאה בקבלת נתוני מזג האוויר.",
+                    testSpeech: "שלום! זהו מבחן של פונקציית הדיבור. אם אתה שומע את זה, סינתזת הדיבור עובדת כראוי."
                 }
             }
         };
@@ -1021,32 +1061,97 @@
             return null;
         }
 
+        // Initialize speech synthesis for iOS compatibility
+        function initSpeechSynthesis() {
+            // iOS requires user interaction before speech synthesis works
+            if ('speechSynthesis' in window) {
+                // Load voices when they become available
+                speechSynthesis.onvoiceschanged = function() {
+                    voices = speechSynthesis.getVoices();
+                    console.log('Voices loaded:', voices.length);
+                };
+                
+                // Force load voices (iOS workaround)
+                voices = speechSynthesis.getVoices();
+                if (voices.length === 0) {
+                    // Try again after a short delay
+                    setTimeout(() => {
+                        voices = speechSynthesis.getVoices();
+                        console.log('Voices loaded after delay:', voices.length);
+                    }, 100);
+                }
+                
+                // iOS workaround: Resume speech synthesis if it was paused
+                if (speechSynthesis.paused) {
+                    speechSynthesis.resume();
+                }
+            }
+        }
+
+        // Handle user interaction for iOS speech synthesis
+        function handleUserInteraction() {
+            if ('speechSynthesis' in window && speechSynthesis.paused) {
+                speechSynthesis.resume();
+            }
+        }
+
+        // iOS-compatible speech function
         function speakText(text) {
             if (!voiceReadingEnabled) {
                 return; // Don't speak if voice reading is disabled
             }
             
-            if ('speechSynthesis' in window) {
+            if ('speechSynthesis' in window && speechSynthesis) {
+                // Cancel any ongoing speech
+                speechSynthesis.cancel();
+                
                 const utterance = new SpeechSynthesisUtterance(text);
                 utterance.rate = 0.9;
                 utterance.pitch = 1.1;
                 utterance.volume = 0.8;
                 
                 // Set language for speech synthesis
-                utterance.lang = currentLanguage === 'en' ? 'en-US' : currentLanguage === 'de' ? 'de-DE' : currentLanguage === 'uk' ? 'uk-UA' : 'he-IL';
+                utterance.lang = currentLanguage === 'en' ? 'en-US' : 
+                               currentLanguage === 'de' ? 'de-DE' : 
+                               currentLanguage === 'uk' ? 'uk-UA' : 'he-IL';
                 
                 // Try to use a female voice if available
-                const voices = speechSynthesis.getVoices();
-                const femaleVoice = voices.find(voice => 
-                    voice.lang.startsWith(currentLanguage) && 
-                    (voice.name.includes('female') || voice.name.includes('Samantha'))
-                );
-                if (femaleVoice) {
-                    utterance.voice = femaleVoice;
+                if (voices.length > 0) {
+                    const femaleVoice = voices.find(voice => 
+                        voice.lang.startsWith(currentLanguage) && 
+                        (voice.name.includes('female') || voice.name.includes('Samantha'))
+                    );
+                    if (femaleVoice) {
+                        utterance.voice = femaleVoice;
+                    }
                 }
                 
-                speechSynthesis.speak(utterance);
+                // iOS-specific event handlers
+                utterance.onstart = function() {
+                    console.log('Speech started');
+                };
+                
+                utterance.onend = function() {
+                    console.log('Speech ended');
+                };
+                
+                utterance.onerror = function(event) {
+                    console.error('Speech error:', event.error);
+                };
+                
+                // Speak with iOS workaround
+                try {
+                    speechSynthesis.speak(utterance);
+                } catch (error) {
+                    console.error('Speech synthesis error:', error);
+                }
             }
+        }
+
+        // Test speech function for iOS
+        function testSpeech() {
+            const testText = translations[currentLanguage].voiceResponses.testSpeech || "Hello, this is a test.";
+            speakText(testText);
         }
 
         function initMap() {
@@ -1284,11 +1389,19 @@
         // Handle voice toggle change
         document.getElementById('voiceToggle').addEventListener('change', toggleVoiceReading);
 
+        // Add user interaction listeners for iOS speech synthesis
+        document.addEventListener('touchstart', handleUserInteraction, { once: true });
+        document.addEventListener('click', handleUserInteraction, { once: true });
+        document.addEventListener('scroll', handleUserInteraction, { once: true });
+
         // Initialize map when page loads
         initMap();
         
         // Initialize speech recognition
         initSpeechRecognition();
+        
+        // Initialize speech synthesis
+        initSpeechSynthesis();
         
         // Load saved preferences
         loadPreferences();
