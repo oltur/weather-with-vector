@@ -737,11 +737,9 @@
         // Update voice toggle UI
         function updateVoiceToggleUI() {
             const voiceToggle = document.getElementById('voiceToggle');
-            const voiceToggleText = document.getElementById('voiceToggleText');
-            const t = translations[currentLanguage];
             
+            // Only update the checkbox state, text is handled by updateUIText()
             voiceToggle.checked = voiceReadingEnabled;
-            voiceToggleText.textContent = t.voiceReading || 'Voice Reading';
         }
 
         // Voice toggle change handler
@@ -952,6 +950,9 @@
             // Update button text
             document.querySelector('button[onclick="getWeatherFromInput()"]').textContent = t.getWeather;
             document.getElementById('voiceText').textContent = t.voice;
+            
+            // Update voice toggle text
+            document.getElementById('voiceToggleText').textContent = t.voiceReading;
             
             // Update voice status
             document.getElementById('voiceStatusText').textContent = t.listening;
