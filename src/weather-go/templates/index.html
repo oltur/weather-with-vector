@@ -934,6 +934,198 @@
                 transition: none;
             }
         }
+
+        .language-dropdown {
+            padding: 12px 20px;
+            border-radius: 20px;
+            border: 2px solid #d4145a;
+            font-size: 1.1em;
+            font-weight: 600;
+            background: #fff;
+            color: #1a1a2e;
+            box-shadow: 0 4px 12px rgba(212, 20, 90, 0.08);
+            outline: none;
+            transition: border 0.2s, box-shadow 0.2s;
+            margin: 0 auto 20px auto;
+            display: block;
+            min-width: 10px;
+            max-width: 100%;
+        }
+        .language-dropdown:focus {
+            border: 2px solid #c2185b;
+            box-shadow: 0 0 0 2px #d4145a33;
+        }
+        body.night .language-dropdown {
+            background: #1a1a2e;
+            color: #fff;
+            border: 2px solid #fff;
+        }
+
+        .input-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .voice-btn.small {
+            padding: 8px 10px;
+            border-radius: 50%;
+            font-size: 1.2em;
+            width: 36px;
+            height: 36px;
+            min-width: 36px;
+            min-height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(45deg, #d4145a, #c2185b);
+            color: #fff;
+            border: none;
+            box-shadow: 0 2px 6px rgba(212, 20, 90, 0.15);
+            transition: background 0.2s;
+        }
+        .voice-btn.small:focus {
+            outline: 2px solid #d4145a;
+        }
+        .voice-btn.small:hover {
+            background: linear-gradient(45deg, #c2185b, #d4145a);
+        }
+        .input-section input {
+            width: 300px;
+            flex: 1 1 auto;
+        }
+        .voice-selector-container { display: none !important; }
+        #testSpeechBtn { display: none !important; }
+        .language-dropdown {
+            margin-left: 8px;
+            margin-bottom: 0;
+        }
+
+        .voice-toggle-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: 25px;
+            border: none;
+            font-size: 1em;
+            font-weight: 700;
+            background: linear-gradient(45deg, #d4145a, #c2185b);
+            color: #fff;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(212, 20, 90, 0.08);
+            transition: background 0.2s, color 0.2s;
+        }
+        .voice-toggle-btn.off {
+            background: #eee;
+            color: #d4145a;
+            border: 2px solid #d4145a;
+        }
+        .voice-toggle-btn:focus {
+            outline: 2px solid #d4145a;
+        }
+
+        .voice-toggle-btn.icon-only {
+            padding: 8px 10px;
+            border-radius: 50%;
+            font-size: 1.2em;
+            width: 36px;
+            height: 36px;
+            min-width: 36px;
+            min-height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(45deg, #d4145a, #c2185b);
+            color: #fff;
+            border: none;
+            box-shadow: 0 2px 6px rgba(212, 20, 90, 0.15);
+            transition: background 0.2s;
+        }
+        .voice-toggle-btn.icon-only.off {
+            background: #eee;
+            color: #d4145a;
+            border: 2px solid #d4145a;
+        }
+        .voice-toggle-btn.icon-only:focus {
+            outline: 2px solid #d4145a;
+        }
+
+        html, body {
+            height: 100%;
+        }
+        body, .container {
+            min-height: 100vh;
+            height: 100%;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+        .input-section {
+            z-index: 10;
+        }
+        #map {
+            flex: 1 1 auto;
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            border-radius: 0;
+            box-shadow: none;
+            border: none;
+            position: relative;
+            z-index: 1;
+        }
+        #weather-popup {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            margin: 0 auto;
+            max-width: 500px;
+            z-index: 1000;
+            display: none;
+            background: rgba(255,255,255,0.98);
+            border-radius: 20px 20px 0 0;
+            box-shadow: 0 -8px 32px rgba(0,0,0,0.18);
+            padding: 32px 24px 24px 24px;
+            transition: transform 0.3s cubic-bezier(.4,2,.6,1), opacity 0.2s;
+            opacity: 1;
+            animation: popup-in 0.3s;
+        }
+        #weather-popup .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 16px;
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            color: #d4145a;
+            cursor: pointer;
+            z-index: 10;
+            padding: 0 6px;
+            line-height: 1;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+        #weather-popup .close-btn:hover {
+            background: #f8e6ec;
+        }
+        @keyframes popup-in {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        #weather-popup.active {
+            display: block;
+        }
+        @media (max-width: 600px) {
+            #weather-popup {
+                max-width: 98vw;
+                padding: 18px 6px 12px 6px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -949,34 +1141,21 @@
         <h1>🌸 Weather App</h1>
         
         <div class="input-section">
-            <input type="text" id="city" placeholder="Enter city or click on map" required>
-            <button onclick="getWeatherFromInput()">Get Weather</button>
-            <button id="voiceBtn" onclick="toggleVoiceInput()" class="voice-btn">
-                <span id="voiceIcon">🎤</span>
-                <span id="voiceText">Voice</span>
-            </button>
-        </div>
-        
-        <!-- Language Switcher -->
-        <div class="language-switcher">
-            <button class="lang-btn active" data-lang="en" onclick="switchLanguage('en')">🇺🇸 EN</button>
-            <button class="lang-btn" data-lang="de" onclick="switchLanguage('de')">🇩🇪 DE</button>
-            <button class="lang-btn" data-lang="uk" onclick="switchLanguage('uk')">🇺🇦 UK</button>
-            <button class="lang-btn" data-lang="he" onclick="switchLanguage('he')">🇮🇱 HE</button>
-        </div>
-        
-        <!-- Voice Reading Toggle -->
-        <div class="voice-toggle-container">
-            <label class="voice-toggle-label">
-                <span id="voiceToggleText">Voice Reading</span>
-                <div class="toggle-switch">
-                    <input type="checkbox" id="voiceToggle" checked>
-                    <span class="slider"></span>
-                </div>
-            </label>
-            <button id="testSpeechBtn" onclick="testSpeech()" class="test-speech-btn" title="Test speech functionality">
-                🔊 Test
-            </button>
+            <div class="input-wrapper">
+                <input type="text" id="city" placeholder="Enter city or click on map" required>
+                <button id="voiceBtn" onclick="toggleVoiceInput()" class="voice-btn small" title="Voice input">
+                    <span id="voiceIcon">🎤</span>
+                </button>
+                <button id="voiceToggleBtn" class="voice-toggle-btn icon-only" onclick="toggleVoiceReading()" title="Voice reading">
+                    <span id="voiceToggleIcon">🔊</span>
+                </button>
+                <select id="languageDropdown" class="language-dropdown" onchange="switchLanguageDropdown()">
+                    <option value="en">🇺🇸</option>
+                    <option value="de">🇩🇪</option>
+                    <option value="uk">🇺🇦</option>
+                    <option value="he">🇮🇱</option>
+                </select>
+            </div>
         </div>
         
         <!-- Voice Selector -->
@@ -998,9 +1177,7 @@
         </div>
         
         <div id="map"></div>
-        <div id="weather-results">
-            <div class="loading">Detecting your location...</div>
-        </div>
+        <div id="weather-popup"></div>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -1053,36 +1230,47 @@
 
         // Update language UI to reflect current language
         function updateLanguageUI() {
-            document.querySelectorAll('.lang-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            document.querySelector(`[data-lang="${currentLanguage}"]`).classList.add('active');
-            
+            const dropdown = document.getElementById('languageDropdown');
+            if (dropdown) dropdown.value = currentLanguage;
             // Update document direction for RTL languages
             if (currentLanguage === 'he') {
                 document.documentElement.setAttribute('dir', 'rtl');
             } else {
                 document.documentElement.setAttribute('dir', 'ltr');
             }
-            
             updateUIText();
+            updateVoiceToggleUI();
+            // Speak the state if enabled
+            if (voiceReadingEnabled) {
+                speakText(translations[currentLanguage].voiceReadingEnabledMsg);
+            }
         }
 
         // Update voice toggle UI
         function updateVoiceToggleUI() {
-            const voiceToggle = document.getElementById('voiceToggle');
-            const voiceToggleText = document.getElementById('voiceToggleText');
+            const btn = document.getElementById('voiceToggleBtn');
+            const icon = document.getElementById('voiceToggleIcon');
+            const text = document.getElementById('voiceToggleText');
             const t = translations[currentLanguage];
-            
-            voiceToggle.checked = voiceReadingEnabled;
-            voiceToggleText.textContent = t.voiceReading || 'Voice Reading';
+            if (voiceReadingEnabled) {
+                btn.classList.remove('off');
+                icon.textContent = '🔊';
+                text.textContent = t.voiceReading || 'Voice Reading';
+            } else {
+                btn.classList.add('off');
+                icon.textContent = '🔇';
+                text.textContent = t.voiceReading || 'Voice Reading';
+            }
         }
 
-        // Voice toggle change handler
+        // Toggle handler
         function toggleVoiceReading() {
             voiceReadingEnabled = !voiceReadingEnabled;
             savePreferences();
             updateVoiceToggleUI();
+            if (voiceReadingEnabled) {
+                speakText(translations[currentLanguage].voiceReadingEnabledMsg);
+            }
         }
 
         // Voice selector functions
@@ -1180,6 +1368,8 @@
                 millimeters: "millimeters",
                 is: "is",
                 voiceReading: "Voice Reading",
+                voiceReadingEnabledMsg: "Voice reading is enabled",
+                voiceReadingDisabledMsg: "Voice reading is disabled",
                 weatherConditions: {
                     clear: "Clear",
                     clouds: "Cloudy",
@@ -1246,6 +1436,8 @@
                 millimeters: "Millimeter",
                 is: "ist",
                 voiceReading: "Sprachausgabe",
+                voiceReadingEnabledMsg: "Sprachausgabe ist aktiviert",
+                voiceReadingDisabledMsg: "Sprachausgabe ist deaktiviert",
                 weatherConditions: {
                     clear: "Klar",
                     clouds: "Bewölkt",
@@ -1311,7 +1503,9 @@
                 metersPerSecond: "метрів за секунду",
                 millimeters: "міліметрів",
                 is: "є",
-                voiceReading: "Голосове читання",
+                voiceReading: "Голосове озвучення",
+                voiceReadingEnabledMsg: "Голосове озвучення увімкнено",
+                voiceReadingDisabledMsg: "Голосове озвучення вимкнено",
                 weatherConditions: {
                     clear: "Ясно",
                     clouds: "Хмарно",
@@ -1377,7 +1571,9 @@
                 metersPerSecond: "מטרים לשנייה",
                 millimeters: "מילימטרים",
                 is: "היא",
-                voiceReading: "קריאה קולית",
+                voiceReading: "הקריאה הקולית",
+                voiceReadingEnabledMsg: "הקריאה הקולית מופעלת",
+                voiceReadingDisabledMsg: "הקריאה הקולית מושבתת",
                 weatherConditions: {
                     clear: "בהיר",
                     clouds: "מעונן",
@@ -1786,17 +1982,14 @@
         }
 
         function getWeatherFromCoordinates(lat, lng) {
-            const resultsDiv = document.getElementById('weather-results');
-            resultsDiv.innerHTML = '<div class="loading">Loading weather data...</div>';
-
             // Reset background while loading
             resetBackground();
-
             fetch(`/weather?lat=${lat}&lng=${lng}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.error) {
-                        resultsDiv.innerHTML = `<div class="error">Error: ${data.error}</div>`;
+                        // Show error in popup
+                        showWeatherPopup(`<div class='error'>Error: ${data.error}</div>`);
                         speakText(translations[currentLanguage].voiceResponses.weatherError);
                         return;
                     }
@@ -1804,7 +1997,7 @@
                     speakWeatherData(data);
                 })
                 .catch(error => {
-                    resultsDiv.innerHTML = `<div class="error">${translations[currentLanguage].voiceResponses.unexpectedError}</div>`;
+                    showWeatherPopup(`<div class='error'>${translations[currentLanguage].voiceResponses.unexpectedError}</div>`);
                     speakText(translations[currentLanguage].voiceResponses.weatherError);
                 });
         }
@@ -1812,24 +2005,18 @@
         function getWeatherFromInput() {
             const city = document.getElementById('city').value;
             if (!city) return;
-
-            const resultsDiv = document.getElementById('weather-results');
-            resultsDiv.innerHTML = '<div class="loading">Loading weather data...</div>';
-
             // Reset background while loading
             resetBackground();
-
             fetch(`/weather?city=${encodeURIComponent(city)}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.error) {
-                        resultsDiv.innerHTML = `<div class="error">Error: ${data.error}</div>`;
+                        showWeatherPopup(`<div class='error'>Error: ${data.error}</div>`);
                         speakText(translations[currentLanguage].voiceResponses.weatherError);
                         return;
                     }
                     displayWeather(data);
                     speakWeatherData(data);
-                    
                     // Update map marker to the city location
                     if (data.coord) {
                         const latLng = { lat: data.coord.lat, lng: data.coord.lon };
@@ -1838,7 +2025,7 @@
                     }
                 })
                 .catch(error => {
-                    resultsDiv.innerHTML = `<div class="error">${translations[currentLanguage].voiceResponses.unexpectedError}</div>`;
+                    showWeatherPopup(`<div class='error'>${translations[currentLanguage].voiceResponses.unexpectedError}</div>`);
                     speakText(translations[currentLanguage].voiceResponses.weatherError);
                 });
         }
@@ -1882,11 +2069,6 @@
 
         function displayWeather(data) {
             const t = translations[currentLanguage];
-            const resultsDiv = document.getElementById('weather-results');
-            
-            // Store last weather data for language switching
-            window.lastWeatherData = data;
-            
             // Translate weather condition
             const translatedWeather = translateWeatherCondition(data.weather[0].main);
             
@@ -2026,9 +2208,6 @@
             }
         });
 
-        // Handle voice toggle change
-        document.getElementById('voiceToggle').addEventListener('change', toggleVoiceReading);
-
         // Add user interaction listeners for iOS speech synthesis
         document.addEventListener('touchstart', handleUserInteraction, { once: true });
         document.addEventListener('click', handleUserInteraction, { once: true });
@@ -2145,6 +2324,97 @@
             if (window.lastWeatherData && voiceReadingEnabled) {
                 speakWeatherData(window.lastWeatherData);
             }
+        }
+
+        // Replace old button-based language switching with dropdown
+        function switchLanguageDropdown() {
+            const dropdown = document.getElementById('languageDropdown');
+            switchLanguage(dropdown.value);
+        }
+
+        // Debounced auto-fetch weather on input
+        let weatherInputTimeout;
+        document.getElementById('city').addEventListener('input', function(e) {
+            clearTimeout(weatherInputTimeout);
+            const value = e.target.value.trim();
+            if (value) {
+                weatherInputTimeout = setTimeout(() => {
+                    getWeatherFromInput();
+                }, 2000);
+            }
+        });
+
+        // Show weather popup overlay and hide on outside click or Esc
+        function showWeatherPopup(html) {
+            const popup = document.getElementById('weather-popup');
+            popup.innerHTML = `<button class='close-btn' onclick='hideWeatherPopup()' title='Close'>&times;</button>` + html;
+            popup.classList.add('active');
+            setTimeout(() => {
+                document.addEventListener('mousedown', handlePopupOutsideClick);
+                document.addEventListener('keydown', handlePopupEscKey);
+            }, 10);
+        }
+        function hideWeatherPopup() {
+            const popup = document.getElementById('weather-popup');
+            popup.classList.remove('active');
+            document.removeEventListener('mousedown', handlePopupOutsideClick);
+            document.removeEventListener('keydown', handlePopupEscKey);
+        }
+        function handlePopupOutsideClick(e) {
+            const popup = document.getElementById('weather-popup');
+            if (popup.classList.contains('active') && !popup.contains(e.target)) {
+                hideWeatherPopup();
+            }
+        }
+        function handlePopupEscKey(e) {
+            if (e.key === 'Escape') {
+                hideWeatherPopup();
+            }
+        }
+        // Patch displayWeather to use popup
+        function displayWeather(data) {
+            const t = translations[currentLanguage];
+            window.lastWeatherData = data;
+            const translatedWeather = translateWeatherCondition(data.weather[0].main);
+            let timeInfo = '';
+            let dateInfo = '';
+            if (data.local_time) {
+                const localTime = new Date(data.local_time);
+                timeInfo = `<p>🕐 ${t.currentTime}: ${localTime.toLocaleTimeString()}</p>`;
+                dateInfo = `<p>📅 ${t.currentDate}: ${localTime.toLocaleDateString()}</p>`;
+            }
+            let precipitationInfo = '';
+            if (data.rain) {
+                if (data.rain['1h'] !== undefined) {
+                    precipitationInfo = `<p>🌧️ ${t.precipitation1h}: ${data.rain['1h']} ${t.millimeters}</p>`;
+                } else if (data.rain['3h'] !== undefined) {
+                    precipitationInfo = `<p>🌧️ ${t.precipitation3h}: ${data.rain['3h']} ${t.millimeters}</p>`;
+                }
+            } else if (data.snow) {
+                if (data.snow['1h'] !== undefined) {
+                    precipitationInfo = `<p>❄️ ${t.precipitation1h}: ${data.snow['1h']} ${t.millimeters}</p>`;
+                } else if (data.snow['3h'] !== undefined) {
+                    precipitationInfo = `<p>❄️ ${t.precipitation3h}: ${data.snow['3h']} ${t.millimeters}</p>`;
+                }
+            } else {
+                precipitationInfo = `<p>🌧️ ${t.precipitation}: ${t.noPrecipitation}</p>`;
+            }
+            const html = `
+                <div class="weather-card">
+                    <h2>🌸 ${data.name}</h2>
+                    ${timeInfo}
+                    ${dateInfo}
+                    <p>🌡️ ${t.temperature}: ${data.main.temp}°C</p>
+                    <p>☁️ ${t.weather}: ${translatedWeather} (${data.weather[0].description})</p>
+                    <p>💧 ${t.humidity}: ${data.main.humidity}%</p>
+                    ${precipitationInfo}
+                    <p>💨 ${t.windSpeed}: ${data.wind.speed} m/s</p>
+                    <p>📍 ${t.coordinates}: ${data.coord.lat.toFixed(4)}, ${data.coord.lon.toFixed(4)}</p>
+                </div>
+            `;
+            showWeatherPopup(html);
+            updateBackground(data);
+            showSunOrRainEffect(data);
         }
     </script>
 </body>
