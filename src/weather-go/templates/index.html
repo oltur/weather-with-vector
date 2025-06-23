@@ -1150,6 +1150,20 @@
             gap: 8px;
             justify-content: flex-start;
         }
+
+        #weather-popup .weather-card {
+            font-size: 0.95em;
+            font-weight: 400;
+        }
+        #weather-popup .weather-card h2 {
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+        #weather-popup .weather-card p {
+            font-size: 0.95em;
+            font-weight: 400;
+            margin: 6px 0;
+        }
     </style>
 </head>
 <body>
@@ -1162,8 +1176,6 @@
     </div>
 
     <div class="container">
-        <h1>🌸 Weather App</h1>
-        
         <div class="input-section">
             <div class="input-wrapper" style="flex-direction: column; align-items: stretch; gap: 8px;">
                 <input type="text" id="city" placeholder="Enter city or click on map" required style="width: 100%; box-sizing: border-box;">
@@ -2095,19 +2107,13 @@
 
         function displayWeather(data) {
             const t = translations[currentLanguage];
-            // Translate weather condition
+            window.lastWeatherData = data;
             const translatedWeather = translateWeatherCondition(data.weather[0].main);
-            
-            // Format time and date if available
             let timeInfo = '';
-            let dateInfo = '';
             if (data.local_time) {
                 const localTime = new Date(data.local_time);
                 timeInfo = `<p>🕐 ${t.currentTime}: ${localTime.toLocaleTimeString()}</p>`;
-                dateInfo = `<p>📅 ${t.currentDate}: ${localTime.toLocaleDateString()}</p>`;
             }
-            
-            // Format precipitation information
             let precipitationInfo = '';
             if (data.rain) {
                 if (data.rain['1h'] !== undefined) {
@@ -2124,12 +2130,10 @@
             } else {
                 precipitationInfo = `<p>🌧️ ${t.precipitation}: ${t.noPrecipitation}</p>`;
             }
-            
-            resultsDiv.innerHTML = `
+            const html = `
                 <div class="weather-card">
                     <h2>🌸 ${data.name}</h2>
                     ${timeInfo}
-                    ${dateInfo}
                     <p>🌡️ ${t.temperature}: ${data.main.temp}°C</p>
                     <p>☁️ ${t.weather}: ${translatedWeather} (${data.weather[0].description})</p>
                     <p>💧 ${t.humidity}: ${data.main.humidity}%</p>
@@ -2138,11 +2142,8 @@
                     <p>📍 ${t.coordinates}: ${data.coord.lat.toFixed(4)}, ${data.coord.lon.toFixed(4)}</p>
                 </div>
             `;
-            
-            // Update background based on weather and time
+            showWeatherPopup(html);
             updateBackground(data);
-            
-            // Add sun or rain effect based on precipitation
             showSunOrRainEffect(data);
         }
 
@@ -2403,11 +2404,9 @@
             window.lastWeatherData = data;
             const translatedWeather = translateWeatherCondition(data.weather[0].main);
             let timeInfo = '';
-            let dateInfo = '';
             if (data.local_time) {
                 const localTime = new Date(data.local_time);
                 timeInfo = `<p>🕐 ${t.currentTime}: ${localTime.toLocaleTimeString()}</p>`;
-                dateInfo = `<p>📅 ${t.currentDate}: ${localTime.toLocaleDateString()}</p>`;
             }
             let precipitationInfo = '';
             if (data.rain) {
@@ -2429,7 +2428,6 @@
                 <div class="weather-card">
                     <h2>🌸 ${data.name}</h2>
                     ${timeInfo}
-                    ${dateInfo}
                     <p>🌡️ ${t.temperature}: ${data.main.temp}°C</p>
                     <p>☁️ ${t.weather}: ${translatedWeather} (${data.weather[0].description})</p>
                     <p>💧 ${t.humidity}: ${data.main.humidity}%</p>
