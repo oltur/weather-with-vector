@@ -2441,6 +2441,87 @@
             updateBackground(data);
             showSunOrRainEffect(data);
         }
+
+        // --- URL state management for direct links ---
+        function updateUrlWithCity(city) {
+            const params = new URLSearchParams(window.location.search);
+            params.set('city', city);
+            params.delete('lat');
+            params.delete('lng');
+            history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
+        }
+        function updateUrlWithCoords(lat, lng) {
+            const params = new URLSearchParams(window.location.search);
+            params.set('lat', lat);
+            params.set('lng', lng);
+            params.delete('city');
+            history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
+        }
+        function getUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            return {
+                city: params.get('city'),
+                lat: params.get('lat'),
+                lng: params.get('lng')
+            };
+        }
+        // Patch getWeatherFromInput to update URL
+        function getWeatherFromInput() {
+            const city = document.getElementById('city').value;
+            if (!city) return;
+            updateUrlWithCity(city);
+            resetBackground();
+            fetch(`/weather?city=${encodeURIComponent(city)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        showWeatherPopup(`<div class='error'>Error: ${data.error}</div>`);
+                        speakText(translations[currentLanguage].voiceResponses.weatherError);
+                        return;
+                    }
+                    displayWeather(data);
+                    speakWeatherData(data);
+                    if (data.coord) {
+                        const latLng = { lat: data.coord.lat, lng: data.coord.lon };
+                        placeMarker(latLng);
+                        map.setView([latLng.lat, latLng.lng], 12);
+                    }
+                })
+                .catch(error => {
+                    showWeatherPopup(`<div class='error'>${translations[currentLanguage].voiceResponses.unexpectedError}</div>`);
+                    speakText(translations[currentLanguage].voiceResponses.weatherError);
+                });
+        }
+        // Patch getWeatherFromCoordinates to update URL
+        function getWeatherFromCoordinates(lat, lng) {
+            updateUrlWithCoords(lat, lng);
+            resetBackground();
+            fetch(`/weather?lat=${lat}&lng=${lng}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        showWeatherPopup(`<div class='error'>Error: ${data.error}</div>`);
+                        speakText(translations[currentLanguage].voiceResponses.weatherError);
+                        return;
+                    }
+                    displayWeather(data);
+                    speakWeatherData(data);
+                })
+                .catch(error => {
+                    showWeatherPopup(`<div class='error'>${translations[currentLanguage].voiceResponses.unexpectedError}</div>`);
+                    speakText(translations[currentLanguage].voiceResponses.weatherError);
+                });
+        }
+        // On page load, check URL params and auto-fetch weather
+        window.addEventListener('DOMContentLoaded', function() {
+            const params = getUrlParams();
+            if (params.city) {
+                document.getElementById('city').value = params.city;
+                getWeatherFromInput();
+            } else if (params.lat && params.lng) {
+                getWeatherFromCoordinates(params.lat, params.lng);
+            }
+        });
     </script>
 </body>
 </html> 
