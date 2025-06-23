@@ -1055,7 +1055,10 @@
         }
 
         html, body {
-            height: 100%;
+            height: auto !important;
+            min-height: 100vh;
+            margin: 0;
+            padding: 5px;
         }
         body, .container {
             min-height: 100vh;
@@ -1064,8 +1067,10 @@
         .container {
             display: flex;
             flex-direction: column;
-            height: 100vh;
+            max-height: calc(100vh - 100px);
             box-sizing: border-box;
+            overflow-y: auto;
+            height: auto !important;
         }
         .input-section {
             z-index: 10;
@@ -1129,6 +1134,22 @@
                 padding: 18px 6px 12px 6px;
             }
         }
+
+        .input-wrapper {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 8px;
+        }
+        .input-section input {
+            width: 100% !important;
+            min-width: 0;
+            box-sizing: border-box;
+        }
+        .button-row {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-start;
+        }
     </style>
 </head>
 <body>
@@ -1144,20 +1165,22 @@
         <h1>🌸 Weather App</h1>
         
         <div class="input-section">
-            <div class="input-wrapper">
-                <input type="text" id="city" placeholder="Enter city or click on map" required>
-                <button id="voiceBtn" onclick="toggleVoiceInput()" class="voice-btn small" title="Voice input">
-                    <span id="voiceIcon">🎤</span>
-                </button>
-                <button id="voiceToggleBtn" class="voice-toggle-btn icon-only" onclick="toggleVoiceReading()" title="Voice reading">
-                    <span id="voiceToggleIcon">🔊</span>
-                </button>
-                <select id="languageDropdown" class="language-dropdown" onchange="switchLanguageDropdown()">
-                    <option value="en">🇺🇸</option>
-                    <option value="de">🇩🇪</option>
-                    <option value="uk">🇺🇦</option>
-                    <option value="he">🇮🇱</option>
-                </select>
+            <div class="input-wrapper" style="flex-direction: column; align-items: stretch; gap: 8px;">
+                <input type="text" id="city" placeholder="Enter city or click on map" required style="width: 100%; box-sizing: border-box;">
+                <div class="button-row" style="display: flex; gap: 8px; justify-content: flex-start;">
+                    <button id="voiceBtn" onclick="toggleVoiceInput()" class="voice-btn small" title="Voice input">
+                        <span id="voiceIcon">🎤</span>
+                    </button>
+                    <button id="voiceToggleBtn" class="voice-toggle-btn icon-only" onclick="toggleVoiceReading()" title="Voice reading">
+                        <span id="voiceToggleIcon">🔊</span>
+                    </button>
+                    <select id="languageDropdown" class="language-dropdown" onchange="switchLanguageDropdown()">
+                        <option value="en">🇺🇸</option>
+                        <option value="de">🇩🇪</option>
+                        <option value="uk">🇺🇦</option>
+                        <option value="he">🇮🇱</option>
+                    </select>
+                </div>
             </div>
         </div>
         
