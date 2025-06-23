@@ -1281,11 +1281,11 @@
             if (voiceReadingEnabled) {
                 btn.classList.remove('off');
                 icon.textContent = '🔊';
-                text.textContent = t.voiceReading || 'Voice Reading';
+                // text.textContent = t.voiceReading || 'Voice Reading';
             } else {
                 btn.classList.add('off');
                 icon.textContent = '🔇';
-                text.textContent = t.voiceReading || 'Voice Reading';
+                // text.textContent = t.voiceReading || 'Voice Reading';
             }
         }
 
@@ -1667,8 +1667,8 @@
             document.getElementById('city').placeholder = t.cityPlaceholder;
             
             // Update button text
-            document.querySelector('button[onclick="getWeatherFromInput()"]').textContent = t.getWeather;
-            document.getElementById('voiceText').textContent = t.voice;
+            // document.querySelector('button[onclick="getWeatherFromInput()"]').textContent = t.getWeather;
+            // document.getElementById('voiceText').textContent = t.voice;
             
             // Update voice toggle text
             updateVoiceToggleUI();
