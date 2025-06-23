@@ -1293,6 +1293,7 @@
             if (voiceReadingEnabled) {
                 btn.classList.remove('off');
                 icon.textContent = '🔊';
+
                 // text.textContent = t.voiceReading || 'Voice Reading';
             } else {
                 btn.classList.add('off');
@@ -1673,7 +1674,7 @@
             const t = translations[currentLanguage];
             
             // Update title
-            document.querySelector('h1').textContent = t.title;
+            // document.querySelector('h1').textContent = t.title;
             
             // Update input placeholder
             document.getElementById('city').placeholder = t.cityPlaceholder;
